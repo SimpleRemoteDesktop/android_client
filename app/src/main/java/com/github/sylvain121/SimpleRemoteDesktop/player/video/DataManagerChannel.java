@@ -2,12 +2,14 @@ package com.github.sylvain121.SimpleRemoteDesktop.player.video;
 
 import android.util.Log;
 
+import com.github.sylvain121.SimpleRemoteDesktop.player.Frame;
 import com.github.sylvain121.SimpleRemoteDesktop.player.Message;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.channels.ByteChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Arrays;
@@ -25,7 +27,6 @@ public class DataManagerChannel {
     private boolean isFirstNal = true;
     public static final String TAG = "DATAMANAGER CHANNEL";
     private SocketChannel chan = null;
-    private byte[] frame;
     private OutputStream output;
 
 
@@ -38,6 +39,7 @@ public class DataManagerChannel {
             chan.connect(socketAddr);
             output = chan.socket().getOutputStream();
             buf = ByteBuffer.allocate(2048*1024);
+            buf.order(ByteOrder.LITTLE_ENDIAN);
             buf.limit (0);
 
         } catch (IOException e) {
@@ -62,20 +64,28 @@ public class DataManagerChannel {
     }
 
     public byte[] receive() {
+        Frame frame = getnewFrame();
+        while(frame.type != 1) { //TODO only return video frame
+            frame = getnewFrame();
+        }
+        return frame.data;
+    }
 
+    private Frame getnewFrame() {
+        Frame frame = new Frame();
         try {
 
             if (chan.isConnected()) {
                 ensure(4, chan);
-                int frameNumber = buf.getInt();
-                Log.d(TAG, "receiving frame number : "+ frameNumber);
+                frame.type = buf.getInt();
+                Log.d(TAG, "receiving frame number : "+ frame.type);
                 ensure(4, chan);
-                int len = buf.getInt();
-                Log.d(TAG, "new frame size : "+len);
-                ensure(len, chan);
-                frame = new byte[len];
-                buf.get(frame, 0, len);
-                Log.d(TAG, "new frame array length :"+frame.length);
+                frame.size = buf.getInt();
+                Log.d(TAG, "new frame size : "+frame.size);
+                ensure(frame.size, chan);
+                frame.data = new byte[frame.size];
+                buf.get(frame.data, 0, frame.size);
+                Log.d(TAG, "new frame array length :"+frame.size);
             } else {
                 Log.d("VIDEO DECODER THREAD","Socket not connected reconnect");
 
@@ -84,7 +94,6 @@ public class DataManagerChannel {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return frame;
     }
 
@@ -152,7 +161,7 @@ public class DataManagerChannel {
         Log.d(this.getClass().getName(), result+"\n");
     }
 
-    private byte[] NALparser() {
+/*    private byte[] NALparser() {
         for(int i = 0; i < net_in.length - 5; i++) {
             if(nalStartCodeDected(i)) {
                 if(!isPPS(i)) {
@@ -168,13 +177,13 @@ public class DataManagerChannel {
             }
         }
         return new byte[0];
-    }
+    }*/
 
-    private byte[] detachFrameFromBuffer(int i) {
+ /*   private byte[] detachFrameFromBuffer(int i) {
         frame = Arrays.copyOf(net_in, i);
         net_in = Arrays.copyOfRange(net_in, i, net_in.length);
         return frame;
-    }
+    }*/
 
     private boolean isPPS(int i) {
         return net_in[i+4] == 0x68;

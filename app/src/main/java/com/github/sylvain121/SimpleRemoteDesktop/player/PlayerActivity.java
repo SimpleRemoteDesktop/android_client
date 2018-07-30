@@ -71,6 +71,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
 
         Intent intent = getIntent();
         this.IPAddress = intent.getStringExtra(MainActivity.IP_ADDRESS);
+        Log.d(TAG, "server address : "+this.IPAddress);
 
     }
 

@@ -5,4 +5,5 @@
     <string name="codec_resolution">video resolution</string>
     <string name="stream_bitrate">video bitrate</string>
     <string name="fps">frame rate</string>
+    <string name="title_activity_quick_connect">QuickConnectActivity</string>
 </resources>

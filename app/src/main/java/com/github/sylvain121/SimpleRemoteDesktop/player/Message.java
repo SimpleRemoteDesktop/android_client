@@ -22,8 +22,7 @@ public class Message {
     private float y = 0;
     private int button = 0;
     private int keyCode = 0;
-    private int width = 0;
-    private int height = 0;
+    private int scancode = 0;
     private int codec_width = 0;
     private int codec_height = 0;
     private int bandwidth = 0;
@@ -50,14 +49,6 @@ public class Message {
         this.keyCode = keyCode;
     }
 
-    public void setWidth(int width) {
-        this.width = width;
-    }
-
-    public void setHeight(int height) {
-        this.height = height;
-    }
-
     public void setCodec_width(int codec_width) {
         this.codec_width = codec_width;
     }
@@ -77,8 +68,6 @@ public class Message {
     public static Message startStream(int width, int height, int fps, int codec_width, int codec_height, int bandwidth) {
         Message message = new Message();
         message.type = TYPE_ENCODER_START;
-        message.width = width;
-        message.height = height;
         message.fps = fps;
         message.codec_width = codec_width;
         message.codec_height = codec_height;
@@ -90,13 +79,14 @@ public class Message {
 
     public byte[] toBytes() {
 
-        ByteBuffer bb = ByteBuffer.allocate(40);
+        ByteBuffer bb = ByteBuffer.allocate(44);
         bb.order(ByteOrder.LITTLE_ENDIAN);
         bb.putInt(type);
         bb.putFloat(x);
         bb.putFloat(y);
         bb.putInt(button);
         bb.putInt(keyCode);
+        bb.putInt(scancode);
         bb.putInt(codec_width);
         bb.putInt(codec_height);
         bb.putInt(bandwidth);
@@ -107,7 +97,7 @@ public class Message {
 
     public ByteBuffer toByteBuffer() {
 
-        ByteBuffer bb = ByteBuffer.allocate(40);
+        ByteBuffer bb = ByteBuffer.allocate(44);
         bb.clear();
         bb.order(ByteOrder.LITTLE_ENDIAN);
         bb.putInt(type);
@@ -115,6 +105,7 @@ public class Message {
         bb.putFloat(y);
         bb.putInt(button);
         bb.putInt(keyCode);
+        bb.putInt(scancode);
         bb.putInt(codec_width);
         bb.putInt(codec_height);
         bb.putInt(bandwidth);

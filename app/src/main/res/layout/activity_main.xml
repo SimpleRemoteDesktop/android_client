@@ -34,10 +34,19 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/floatingActionButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            app:srcCompat="@android:drawable/btn_star"
+            android:onClick="onQuickConnect"/>
+
         <ListView
             android:id="@android:id/list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"></ListView>
+
     </LinearLayout>
 
 </LinearLayout>

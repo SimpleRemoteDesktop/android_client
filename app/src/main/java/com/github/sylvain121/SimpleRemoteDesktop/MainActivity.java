@@ -101,5 +101,10 @@ public class MainActivity extends ListActivity implements SurfaceHolder.Callback
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
     }
+
+    public void onQuickConnect(View view) {
+        Intent intent = new Intent(this, QuickConnectActivity.class);
+        startActivity(intent);
+    }
 }
 
