@@ -35,5 +35,6 @@ dependencies {
     compile 'com.android.support:design:25.3.1'
     compile 'com.google.guava:guava:22.0-android'
     compile 'org.jcodec:jcodec-android:0.2.0'
+    compile 'com.github.martoreto:opuscodec:v1.2.1.2'
     testCompile 'junit:junit:4.12'
 }
