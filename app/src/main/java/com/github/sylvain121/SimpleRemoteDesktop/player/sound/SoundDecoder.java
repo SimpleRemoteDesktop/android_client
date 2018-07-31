@@ -38,7 +38,7 @@ public class SoundDecoder {
 
     }
 
-    void decodeFrame(byte[] inBuffer) {
+    public void decodeFrame(byte[] inBuffer) {
         int decoded = decoder.decode(inBuffer, outBuf, FRAME_SIZE);
         track.write(outBuf, 0, decoded * channels);
     }

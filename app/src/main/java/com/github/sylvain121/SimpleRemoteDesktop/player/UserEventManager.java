@@ -1,10 +1,9 @@
 package com.github.sylvain121.SimpleRemoteDesktop.player;
 
-import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.MotionEvent;
 
-import com.github.sylvain121.SimpleRemoteDesktop.player.video.DataManagerChannel;
+import com.github.sylvain121.SimpleRemoteDesktop.player.network.DataManagerChannel;
 
 /**
  * Created by ESME7383 on 02/08/2017.

@@ -17,6 +17,7 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.github.sylvain121.SimpleRemoteDesktop.MainActivity;
+import com.github.sylvain121.SimpleRemoteDesktop.player.sound.SoundDecoder;
 import com.github.sylvain121.SimpleRemoteDesktop.player.video.MediaCodecDecoderRenderer;
 import com.github.sylvain121.SimpleRemoteDesktop.settings.SettingsActivity;
 
@@ -101,8 +102,10 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
         userEventManager.setScreenSize(width, height);
         Log.d(TAG, "Start H264 encoder");
         mediaCodec.start();
+        Log.d(TAG, "start audio decoder");
+        SoundDecoder sound = new SoundDecoder(48000, 2);
         Log.d(TAG, "init  network thread");
-        cnx = new ConnectionThread(width, height, this.IPAddress, sharedPreference);
+        cnx = new ConnectionThread(width, height, this.IPAddress, sharedPreference, sound);
         cnx.setDecoderHandler(mediaCodec);
         Log.d(TAG, "start network thread");
         cnx.start();
@@ -143,14 +146,14 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent keyEvent) {
         Log.d(TAG, "key down "+keyCode);
-        userEventManager.keyDown(keyCode);
-        return true;
+        //userEventManager.keyDown(keyCode);
+        return false;
     }
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent keyEvent) {
         Log.d(TAG, "key up "+keyCode);
-        userEventManager.keyUp(keyCode);
-        return true;
+        //userEventManager.keyUp(keyCode);
+        return false;
     }
 }
