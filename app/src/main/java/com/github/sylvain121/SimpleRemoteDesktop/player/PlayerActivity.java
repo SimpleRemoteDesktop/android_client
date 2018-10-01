@@ -17,9 +17,11 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.github.sylvain121.SimpleRemoteDesktop.MainActivity;
-import com.github.sylvain121.SimpleRemoteDesktop.player.sound.SoundDecoder;
 import com.github.sylvain121.SimpleRemoteDesktop.player.video.MediaCodecDecoderRenderer;
 import com.github.sylvain121.SimpleRemoteDesktop.settings.SettingsActivity;
+
+import java.util.LinkedList;
+import java.util.concurrent.LinkedBlockingDeque;
 
 public class PlayerActivity extends Activity implements SurfaceHolder.Callback, InputManager.InputDeviceListener {
 
@@ -29,6 +31,9 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
     private boolean MouseIsPresent = false;
     private MediaCodecDecoderRenderer mediaCodec;
     private ConnectionThread cnx;
+    private LinkedList<Message> inputNetworkQueue;
+    private LinkedList<Frame> soundQueue;
+    private LinkedList<Frame> videoQueue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,9 +49,16 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
                         | View.SYSTEM_UI_FLAG_IMMERSIVE);
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         SurfaceView sv = new SurfaceView(this);
         sv.getHolder().addCallback(this);
-        userEventManager = new UserEventManager();
+
+        this.soundQueue = new LinkedList<Frame>();
+        this.videoQueue = new LinkedList<Frame>();
+        this.inputNetworkQueue = new LinkedList<Message>();
+
+        userEventManager = new UserEventManager(inputNetworkQueue);
+
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         setContentView(sv);
         sv.setOnGenericMotionListener(new View.OnGenericMotionListener() {
@@ -73,6 +85,8 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
         Intent intent = getIntent();
         this.IPAddress = intent.getStringExtra(MainActivity.IP_ADDRESS);
         Log.d(TAG, "server address : "+this.IPAddress);
+
+
 
     }
 
@@ -103,9 +117,10 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
         Log.d(TAG, "Start H264 encoder");
         mediaCodec.start();
         Log.d(TAG, "start audio decoder");
-        SoundDecoder sound = new SoundDecoder(48000, 2);
+        //SoundDecoder sound = new SoundDecoder(48000, 2, this.soundQueue);
+        //sound.start();
         Log.d(TAG, "init  network thread");
-        cnx = new ConnectionThread(width, height, this.IPAddress, sharedPreference, sound);
+        cnx = new ConnectionThread(width, height, this.IPAddress, sharedPreference, inputNetworkQueue, videoQueue, soundQueue);
         cnx.setDecoderHandler(mediaCodec);
         Log.d(TAG, "start network thread");
         cnx.start();

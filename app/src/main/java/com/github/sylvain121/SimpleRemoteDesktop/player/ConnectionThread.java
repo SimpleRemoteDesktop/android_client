@@ -4,11 +4,12 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.github.sylvain121.SimpleRemoteDesktop.player.network.DataManagerChannel;
-import com.github.sylvain121.SimpleRemoteDesktop.player.sound.SoundDecoder;
 import com.github.sylvain121.SimpleRemoteDesktop.player.video.MediaCodecDecoderRenderer;
 import com.github.sylvain121.SimpleRemoteDesktop.settings.SettingsActivity;
 
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * Created by ESME7383 on 06/10/2017.
@@ -20,7 +21,9 @@ class ConnectionThread extends Thread {
     private final String ipAddress;
     private final int bandwidth;
     private final int fps;
-    private final SoundDecoder sound;
+    private final LinkedList<Message> inputQueue;
+    private final LinkedList<Frame> videoQueue;
+    private final LinkedList<Frame> soundQueue;
     private int codec_height;
     private int codec_width;
     private DataManagerChannel m_renderSock;
@@ -29,12 +32,16 @@ class ConnectionThread extends Thread {
 
     private final static String TAG = "CONNEXION_THREAD";
 
-    public ConnectionThread(int width, int height, String ipAddress, SharedPreferences sharedPreference, SoundDecoder sound) {
+    public ConnectionThread(int width, int height, String ipAddress, SharedPreferences sharedPreference, LinkedList<Message> inputNetworkQueue, LinkedList<Frame> videoQueue, LinkedList<Frame> soundQueue) {
 
         this.width = width;
         this.height = height;
         this.ipAddress = ipAddress;
-        this.sound = sound;
+
+        this.inputQueue = inputNetworkQueue;
+        this.videoQueue = videoQueue;
+        this.soundQueue = soundQueue;
+
 
         String currentResolution = sharedPreference.getString(SettingsActivity.SIMPLE_REMOTE_DESKTOP_PREF_RESOLUTION, null);
 
@@ -51,9 +58,6 @@ class ConnectionThread extends Thread {
                 codec_width = 1920;
                 codec_height = 1080;
                 break;
-            case "original":
-                codec_width = 0;
-                codec_height = 0;
         }
 
 
@@ -82,8 +86,13 @@ class ConnectionThread extends Thread {
                     break;
                 case Frame.AUDIO:
                     Log.d(TAG, "New audio frame");
-                    sound.decodeFrame(frame.data);
-
+                    this.soundQueue.add(frame);
+                    Log.d(TAG, "New Audio frame, queue size : " + this.soundQueue.size());
+            }
+            while(!this.inputQueue.isEmpty()) {
+                Message m = this.inputQueue.poll();
+                Log.d(TAG, "send new input event");
+                m_renderSock.send(m);
             }
         }
     }

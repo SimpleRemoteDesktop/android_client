@@ -103,11 +103,11 @@ public class X11KeyBoardDefinition {
 
     public static int XK_VoidSymbol = 0xffffff;/* Void symbol */
 
-	/*
+    /*
      * TTY function keys, cleverly chosen to map to ASCII, for convenience of
-	 * programming, but could have been arbitrary (at the cost of lookup
-	 * tables in client code).
-	 */
+     * programming, but could have been arbitrary (at the cost of lookup
+     * tables in client code).
+     */
 
     public static int XK_BackSpace = 0xff08;/* Back space, back char */
     public static int XK_Tab = 0xff09;
@@ -122,7 +122,7 @@ public class X11KeyBoardDefinition {
 
 
 
-		/* International & multi-key character composition */
+    /* International & multi-key character composition */
 
     public static int XK_Multi_key = 0xff20;/* Multi-key character compose */
     public static int XK_Codeinput = 0xff37;
@@ -130,7 +130,7 @@ public class X11KeyBoardDefinition {
     public static int XK_MultipleCandidate = 0xff3d;
     public static int XK_PreviousCandidate = 0xff3e;
 
-		/* Japanese keyboard support */
+    /* Japanese keyboard support */
 
     public static int XK_Kanji = 0xff21;/* Kanji, Kanji convert */
     public static int XK_Muhenkan = 0xff22;/* Cancel Conversion */
@@ -153,9 +153,9 @@ public class X11KeyBoardDefinition {
     public static int XK_Zen_Koho = 0xff3d;/* Multiple/All Candidate(s) */
     public static int XK_Mae_Koho = 0xff3e;/* Previous Candidate */
 
-	/* 0xff31 thru 0xff3f are under XK_KOREAN */
+    /* 0xff31 thru 0xff3f are under XK_KOREAN */
 
-	/* Cursor control & motion */
+    /* Cursor control & motion */
 
     public static int XK_Home = 0xff50;
     public static int XK_Left = 0xff51;  /* Move left, left arrow */
@@ -170,23 +170,23 @@ public class X11KeyBoardDefinition {
     public static int XK_Begin = 0xff58;/* BOL */
 
 
-	/* Misc functions */
+    /* Misc functions */
 
     public static int XK_Select = 0xff60;/* Select, mark */
     public static int XK_Print = 0xff61;
     public static int XK_Execute = 0xff62;  /* Execute, run, do */
     public static int XK_Insert = 0xff63;/* Insert, insert here */
     public static int XK_Undo = 0xff65;
-    public static int XK_Redo = 0xff66 ; /* Redo, again */
+    public static int XK_Redo = 0xff66; /* Redo, again */
     public static int XK_Menu = 0xff67;
-    public static int XK_Find = 0xff68  ;/* Find, search */
+    public static int XK_Find = 0xff68;/* Find, search */
     public static int XK_Cancel = 0xff69;/* Cancel, stop, abort, exit */
     public static int XK_Help = 0xff6a;/* Help */
     public static int XK_Break = 0xff6b;
     public static int XK_Mode_switch = 0xff7e;  /* Character set switch */
     public static int XK_script_switch = 0xff7e;/* Alias for mode_switch */
     public static int XK_Num_Lock = 0xff7f;
-	/* Keypad functions, keypad numbers cleverly chosen to map to ASCII */
+    /* Keypad functions, keypad numbers cleverly chosen to map to ASCII */
 
     public static int XK_KP_Space = 0xff80;/* Space */
     public static int XK_KP_Tab = 0xff89;
@@ -228,12 +228,12 @@ public class X11KeyBoardDefinition {
 
 
 
-		/*
-		 * Auxilliary functions; note the duplicate definitions for left and right
-		 * function keys;  Sun keyboards and a few other manufactures have such
-		 * function key groups on the left and/or right sides of the keyboard.
-		 * We've not found a keyboard with more than 35 function keys total.
-		 */
+    /*
+     * Auxilliary functions; note the duplicate definitions for left and right
+     * function keys;  Sun keyboards and a few other manufactures have such
+     * function key groups on the left and/or right sides of the keyboard.
+     * We've not found a keyboard with more than 35 function keys total.
+     */
 
     public static int XK_F1 = 0xffbe;
     public static int XK_F2 = 0xffbf;
@@ -244,7 +244,7 @@ public class X11KeyBoardDefinition {
     public static int XK_F7 = 0xffc4;
     public static int XK_F8 = 0xffc5;
     public static int XK_F9 = 0xffc6;
-    public static int XK_F10 =0xffc7;
+    public static int XK_F10 = 0xffc7;
     public static int XK_F11 = 0xffc8;
     public static int XK_L1 = 0xffc8;
     public static int XK_F12 = 0xffc9;
@@ -264,7 +264,7 @@ public class X11KeyBoardDefinition {
     public static int XK_F19 = 0xffd0;
     public static int XK_L9 = 0xffd0;
     public static int XK_F20 = 0xffd1;
-    public static int XK_L10 =0xffd1;
+    public static int XK_L10 = 0xffd1;
     public static int XK_F21 = 0xffd2;
     public static int XK_R1 = 0xffd2;
     public static int XK_F22 = 0xffd3;
@@ -296,7 +296,7 @@ public class X11KeyBoardDefinition {
     public static int XK_F35 = 0xffe0;
     public static int XK_R15 = 0xffe0;
 
-		/* Modifiers */
+    /* Modifiers */
 
     public static int XK_Shift_L = 0xffe1;/* Left shift */
     public static int XK_Shift_R = 0xffe2;/* Right shift */
@@ -314,11 +314,11 @@ public class X11KeyBoardDefinition {
     public static int XK_Hyper_L = 0xffed;/* Left hyper */
     public static int XK_Hyper_R = 0xffee;/* Right hyper */
 
-	/*
-	 * Keyboard (XKB) Extension function and modifier keys
-	 * (from Appendix C of "The X Keyboard Extension: Protocol Specification")
-	 * Byte 3 = 0xfe
-	 */
+    /*
+     * Keyboard (XKB) Extension function and modifier keys
+     * (from Appendix C of "The X Keyboard Extension: Protocol Specification")
+     * Byte 3 = 0xfe
+     */
 
     public static int XK_ISO_Lock = 0xfe01;
     public static int XK_ISO_Level2_Latch = 0xfe02;
@@ -426,10 +426,10 @@ public class X11KeyBoardDefinition {
     public static int XK_Pointer_DfltBtnPrev = 0xfefc;
 
 
-		/*
-		 * 3270 Terminal Keys
-		 * Byte 3 = 0xfd
-		 */
+    /*
+     * 3270 Terminal Keys
+     * Byte 3 = 0xfd
+     */
 
     public static int XK_3270_Duplicate = 0xfd01;
     public static int XK_3270_FieldMark = 0xfd02;
@@ -463,10 +463,10 @@ public class X11KeyBoardDefinition {
     public static int XK_3270_Enter = 0xfd1e;
 
     /*
-		 * Latin 1
-		 * (ISO/IEC 8859-1 = Unicode U+0020..U+00FF)
-		 * Byte 3 = 0
-		 */
+     * Latin 1
+     * (ISO/IEC 8859-1 = Unicode U+0020..U+00FF)
+     * Byte 3 = 0
+     */
     public static int XK_space = 0x0020;/* U+0020 SPACE */
     public static int XK_exclam = 0x0021;/* U+0021 EXCLAMATION MARK */
     public static int XK_quotedbl = 0x0022;/* U+0022 QUOTATION MARK */
@@ -666,10 +666,10 @@ public class X11KeyBoardDefinition {
     public static int XK_thorn = 0x00fe;/* U+00FE LATIN SMALL LETTER THORN */
     public static int XK_ydiaeresis = 0x00ff;/* U+00FF LATIN SMALL LETTER Y WITH DIAERESIS */
 
-	/*
-	 * Latin 2
-	 * Byte 3 = 1
-	 */
+    /*
+     * Latin 2
+     * Byte 3 = 1
+     */
 
     public static int XK_Aogonek = 0x01a1;/* U+0104 LATIN CAPITAL LETTER A WITH OGONEK */
     public static int XK_breve = 0x01a2;/* U+02D8 BREVE */
@@ -729,10 +729,10 @@ public class X11KeyBoardDefinition {
     public static int XK_tcedilla = 0x01fe;/* U+0163 LATIN SMALL LETTER T WITH CEDILLA */
     public static int XK_abovedot = 0x01ff;/* U+02D9 DOT ABOVE */
 
-	/*
-	 * Latin 3
-	 * Byte 3 = 2
-	 */
+    /*
+     * Latin 3
+     * Byte 3 = 2
+     */
 
     public static int XK_Hstroke = 0x02a1;/* U+0126 LATIN CAPITAL LETTER H WITH STROKE */
     public static int XK_Hcircumflex = 0x02a6;/* U+0124 LATIN CAPITAL LETTER H WITH CIRCUMFLEX */
@@ -758,10 +758,10 @@ public class X11KeyBoardDefinition {
     public static int XK_scircumflex = 0x02fe;/* U+015D LATIN SMALL LETTER S WITH CIRCUMFLEX */
 
 
-	/*
-	 * Latin 4
-	 * Byte 3 = 3
-	 */
+    /*
+     * Latin 4
+     * Byte 3 = 3
+     */
 
     public static int XK_kra = 0x03a2;/* U+0138 LATIN SMALL LETTER KRA */
     public static int XK_kappa = 0x03a2;/* deprecated */
@@ -801,8 +801,8 @@ public class X11KeyBoardDefinition {
     public static int XK_umacron = 0x03fe;/* U+016B LATIN SMALL LETTER U WITH MACRON */
 
     /*
-	 * Latin 8
-	 */
+     * Latin 8
+     */
     public static int XK_Babovedot = 0x1001e02;/* U+1E02 LATIN CAPITAL LETTER B WITH DOT ABOVE */
     public static int XK_babovedot = 0x1001e03;/* U+1E03 LATIN SMALL LETTER B WITH DOT ABOVE */
     public static int XK_Dabovedot = 0x1001e0a;/* U+1E0A LATIN CAPITAL LETTER D WITH DOT ABOVE */
@@ -830,19 +830,19 @@ public class X11KeyBoardDefinition {
     public static int XK_tabovedot = 0x1001e6b;/* U+1E6B LATIN SMALL LETTER T WITH DOT ABOVE */
     public static int XK_ycircumflex = 0x1000177;/* U+0177 LATIN SMALL LETTER Y WITH CIRCUMFLEX */
 
-	/*
-	 * Latin 9
-	 * Byte 3 = 0x13
-	 */
+    /*
+     * Latin 9
+     * Byte 3 = 0x13
+     */
 
     public static int XK_OE = 0x13bc;/* U+0152 LATIN CAPITAL LIGATURE OE */
     public static int XK_oe = 0x13bd;/* U+0153 LATIN SMALL LIGATURE OE */
     public static int XK_Ydiaeresis = 0x13be;/* U+0178 LATIN CAPITAL LETTER Y WITH DIAERESIS */
 
-	/*
-	 * Katakana
-	 * Byte 3 = 4
-	 */
+    /*
+     * Katakana
+     * Byte 3 = 4
+     */
 
     public static int XK_overline = 0x047e;/* U+203E OVERLINE */
     public static int XK_kana_fullstop = 0x04a1;/* U+3002 IDEOGRAPHIC FULL STOP */
@@ -915,10 +915,10 @@ public class X11KeyBoardDefinition {
     public static int XK_semivoicedsound = 0x04df;/* U+309C KATAKANA-HIRAGANA SEMI-VOICED SOUND MARK */
     public static int XK_kana_switch = 0xff7e;/* Alias for mode_switch */
 
-	/*
-	 * Arabic
-	 * Byte 3 = 5
-	 */
+    /*
+     * Arabic
+     * Byte 3 = 5
+     */
 
     public static int XK_Farsi_0 = 0x10006f0;/* U+06F0 EXTENDED ARABIC-INDIC DIGIT ZERO */
     public static int XK_Farsi_1 = 0x10006f1;/* U+06F1 EXTENDED ARABIC-INDIC DIGIT ONE */
@@ -1013,9 +1013,9 @@ public class X11KeyBoardDefinition {
     public static int XK_Arabic_switch = 0xff7e;/* Alias for mode_switch */
 
     /*
-	 * Cyrillic
-	 * Byte 3 = 6
-	 */
+     * Cyrillic
+     * Byte 3 = 6
+     */
     public static int XK_Cyrillic_GHE_bar = 0x1000492;/* U+0492 CYRILLIC CAPITAL LETTER GHE WITH STROKE */
     public static int XK_Cyrillic_ghe_bar = 0x1000493;/* U+0493 CYRILLIC SMALL LETTER GHE WITH STROKE */
     public static int XK_Cyrillic_ZHE_descender = 0x1000496;/* U+0496 CYRILLIC CAPITAL LETTER ZHE WITH DESCENDER */
@@ -1158,11 +1158,11 @@ public class X11KeyBoardDefinition {
     public static int XK_Cyrillic_CHE = 0x06fe;/* U+0427 CYRILLIC CAPITAL LETTER CHE */
     public static int XK_Cyrillic_HARDSIGN = 0x06ff;/* U+042A CYRILLIC CAPITAL LETTER HARD SIGN */
 
-	/*
-	 * Greek
-	 * (based on an early draft of, and not quite identical to, ISO/IEC 8859-7)
-	 * Byte 3 = 7
-	 */
+    /*
+     * Greek
+     * (based on an early draft of, and not quite identical to, ISO/IEC 8859-7)
+     * Byte 3 = 7
+     */
 
     public static int XK_Greek_ALPHAaccent = 0x07a1;/* U+0386 GREEK CAPITAL LETTER ALPHA WITH TONOS */
     public static int XK_Greek_EPSILONaccent = 0x07a2;/* U+0388 GREEK CAPITAL LETTER EPSILON WITH TONOS */
@@ -1240,11 +1240,11 @@ public class X11KeyBoardDefinition {
     public static int XK_Greek_omega = 0x07f9;/* U+03C9 GREEK SMALL LETTER OMEGA */
     public static int XK_Greek_switch = 0xff7e;/* Alias for mode_switch */
 
-	/*
-	 * Technical
-	 * (from the DEC VT330/VT420 Technical Character Set, http://vt100.net/charsets/technical.html)
-	 * Byte 3 = 8
-	 */
+    /*
+     * Technical
+     * (from the DEC VT330/VT420 Technical Character Set, http://vt100.net/charsets/technical.html)
+     * Byte 3 = 8
+     */
 
     public static int XK_leftradical = 0x08a1;/* U+23B7 RADICAL SYMBOL BOTTOM */
     public static int XK_topleftradical = 0x08a2;/*(U+250C BOX DRAWINGS LIGHT DOWN AND RIGHT)*/
@@ -1296,11 +1296,11 @@ public class X11KeyBoardDefinition {
     public static int XK_rightarrow = 0x08fd;/* U+2192 RIGHTWARDS ARROW */
     public static int XK_downarrow = 0x08fe;/* U+2193 DOWNWARDS ARROW */
 
-	/*
-	 * Special
-	 * (from the DEC VT100 Special Graphics Character Set)
-	 * Byte 3 = 9
-	 */
+    /*
+     * Special
+     * (from the DEC VT100 Special Graphics Character Set)
+     * Byte 3 = 9
+     */
 
     public static int XK_blank = 0x09df;
     public static int XK_soliddiamond = 0x09e0;  /* U+25C6 BLACK DIAMOND */
@@ -1327,12 +1327,12 @@ public class X11KeyBoardDefinition {
     public static int XK_topt = 0x09f7;/* U+252C BOX DRAWINGS LIGHT DOWN AND HORIZONTAL */
     public static int XK_vertbar = 0x09f8;/* U+2502 BOX DRAWINGS LIGHT VERTICAL */
 
-	/*
-	 * Publishing
-	 * (these are probably from a long forgotten DEC Publishing
-	 * font that once shipped with DECwrite)
-	 * Byte 3 = 0x0a
-	 */
+    /*
+     * Publishing
+     * (these are probably from a long forgotten DEC Publishing
+     * font that once shipped with DECwrite)
+     * Byte 3 = 0x0a
+     */
 
     public static int XK_emspace = 0x0aa1;/* U+2003 EM SPACE */
     public static int XK_enspace = 0x0aa2;/* U+2002 EN SPACE */
@@ -1417,10 +1417,10 @@ public class X11KeyBoardDefinition {
     public static int XK_singlelowquotemark = 0x0afd;/* U+201A SINGLE LOW-9 QUOTATION MARK */
     public static int XK_doublelowquotemark = 0x0afe;/* U+201E DOUBLE LOW-9 QUOTATION MARK */
     public static int XK_cursor = 0x0aff;
-	/*
-	 * APL
-	 * Byte 3 = 0x0b
-	 */
+    /*
+     * APL
+     * Byte 3 = 0x0b
+     */
 
     public static int XK_leftcaret = 0x0ba3;/*(U+003C LESS-THAN SIGN)*/
     public static int XK_rightcaret = 0x0ba6;/*(U+003E GREATER-THAN SIGN)*/
@@ -1442,10 +1442,10 @@ public class X11KeyBoardDefinition {
     public static int XK_lefttack = 0x0bdc;/* U+22A2 RIGHT TACK */
     public static int XK_righttack = 0x0bfc;/* U+22A3 LEFT TACK */
 
-	/*
-	 * Hebrew
-	 * Byte 3 = 0x0c
-	 */
+    /*
+     * Hebrew
+     * Byte 3 = 0x0c
+     */
 
     public static int XK_hebrew_doublelowline = 0x0cdf;/* U+2017 DOUBLE LOW LINE */
     public static int XK_hebrew_aleph = 0x0ce0;/* U+05D0 HEBREW LETTER ALEF */
@@ -1488,10 +1488,10 @@ public class X11KeyBoardDefinition {
     public static int XK_hebrew_taf = 0x0cfa;/* deprecated */
     public static int XK_Hebrew_switch = 0xff7e;/* Alias for mode_switch */
 
-	/*
-	 * Thai
-	 * Byte 3 = 0x0d
-	 */
+    /*
+     * Thai
+     * Byte 3 = 0x0d
+     */
 
     public static int XK_Thai_kokai = 0x0da1;/* U+0E01 THAI CHARACTER KO KAI */
     public static int XK_Thai_khokhai = 0x0da2;/* U+0E02 THAI CHARACTER KHO KHAI */
@@ -1578,10 +1578,10 @@ public class X11KeyBoardDefinition {
     public static int XK_Thai_lekpaet = 0x0df8;/* U+0E58 THAI DIGIT EIGHT */
     public static int XK_Thai_lekkao = 0x0df9;/* U+0E59 THAI DIGIT NINE */
 
-	/*
-	 * Korean
-	 * Byte 3 = 0x0e
-	 */
+    /*
+     * Korean
+     * Byte 3 = 0x0e
+     */
 
 
     public static int XK_Hangul = 0xff31;/* Hangul start/stop(toggle) */
@@ -1703,9 +1703,9 @@ public class X11KeyBoardDefinition {
     public static int XK_Korean_Won = 0x0eff;/*(U+20A9 WON SIGN)*/
 
 
-	/*
-	 * Armenian
-	 */
+    /*
+     * Armenian
+     */
 
     public static int XK_Armenian_ligature_ew = 0x1000587;/* U+0587 ARMENIAN SMALL LIGATURE ECH YIWN */
     public static int XK_Armenian_full_stop = 0x1000589;/* U+0589 ARMENIAN FULL STOP */
@@ -1798,9 +1798,9 @@ public class X11KeyBoardDefinition {
     public static int XK_Armenian_fe = 0x1000586;/* U+0586 ARMENIAN SMALL LETTER FEH */
     public static int XK_Armenian_apostrophe = 0x100055a;/* U+055A ARMENIAN APOSTROPHE */
 
-	/*
-	 * Georgian
-	 */
+    /*
+     * Georgian
+     */
 
     public static int XK_Georgian_an = 0x10010d0;/* U+10D0 GEORGIAN LETTER AN */
     public static int XK_Georgian_ban = 0x10010d1;/* U+10D1 GEORGIAN LETTER BAN */
@@ -1842,9 +1842,9 @@ public class X11KeyBoardDefinition {
     public static int XK_Georgian_hoe = 0x10010f5;/* U+10F5 GEORGIAN LETTER HOE */
     public static int XK_Georgian_fi = 0x10010f6;/* U+10F6 GEORGIAN LETTER FI */
 
-	/*
-	 * Azeri (and other Turkic or Caucasian languages)
-	 */
+    /*
+     * Azeri (and other Turkic or Caucasian languages)
+     */
 
     /* latin */
     public static int XK_Xabovedot = 0x1001e8a;/* U+1E8A LATIN CAPITAL LETTER X WITH DOT ABOVE */
@@ -1862,13 +1862,13 @@ public class X11KeyBoardDefinition {
     public static int XK_SCHWA = 0x100018f;/* U+018F LATIN CAPITAL LETTER SCHWA */
     public static int XK_schwa = 0x1000259;/* U+0259 LATIN SMALL LETTER SCHWA */
     /* those are not really Caucasus */
-	/* For Inupiak */
+    /* For Inupiak */
     public static int XK_Lbelowdot = 0x1001e36;/* U+1E36 LATIN CAPITAL LETTER L WITH DOT BELOW */
     public static int XK_lbelowdot = 0x1001e37;/* U+1E37 LATIN SMALL LETTER L WITH DOT BELOW */
 
-	/*
-	 * Vietnamese
-	 */
+    /*
+     * Vietnamese
+     */
 
     public static int XK_Abelowdot = 0x1001ea0;/* U+1EA0 LATIN CAPITAL LETTER A WITH DOT BELOW */
     public static int XK_abelowdot = 0x1001ea1;/* U+1EA1 LATIN SMALL LETTER A WITH DOT BELOW */

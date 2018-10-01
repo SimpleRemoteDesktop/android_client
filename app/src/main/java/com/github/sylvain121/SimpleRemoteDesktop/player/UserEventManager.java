@@ -3,7 +3,8 @@ package com.github.sylvain121.SimpleRemoteDesktop.player;
 import android.util.Log;
 import android.view.MotionEvent;
 
-import com.github.sylvain121.SimpleRemoteDesktop.player.network.DataManagerChannel;
+
+import java.util.LinkedList;
 
 /**
  * Created by ESME7383 on 02/08/2017.
@@ -12,6 +13,7 @@ import com.github.sylvain121.SimpleRemoteDesktop.player.network.DataManagerChann
 class UserEventManager {
 
     public static String TAG = "EVENT LISTENER";
+    private final LinkedList<Message> queue;
     private int previousButtonState = 0;
 
 
@@ -24,6 +26,10 @@ class UserEventManager {
     private int screenWidth = 0;
     private int screenHeight = 0;
 
+    public UserEventManager(LinkedList<Message> inputNetworkQueue) {
+        this.queue = inputNetworkQueue;
+    }
+
 
     public boolean genericMouseHandler(MotionEvent event) {
 
@@ -33,18 +39,18 @@ class UserEventManager {
         Log.d(TAG, event.getAction()+"");
         Log.d(TAG, "left : " + left + " right : " + right);
 
-
                 if (isMouseButtonStateChange(left, preLeft)) {
-                    Log.d(TAG, "left click change detected");
+                    Log.d(TAG, "input : left click change detected");
                     preLeft = left;
                     sendMouseButtonUpdate("left", left);
                 } else if (isMouseButtonStateChange(right, prevRight)) {
                     prevRight = right;
-                    Log.d(TAG, "right click change detected");
+                    Log.d(TAG, "input : right click change detected");
                     sendMouseButtonUpdate("right", right);
                 } else {
                     sendMousePosition(event.getX(), event.getY());
                 }
+                Log.d(TAG, "input add event to queue");
 
         return true;
     }
@@ -54,16 +60,20 @@ class UserEventManager {
             float x = fx / this.screenWidth;
             float y = fy / this.screenHeight;
             Log.d(TAG, "X : " + x + " Y : " + y);
-            DataManagerChannel.getInstance().sendMouseMotion(x, y);
+            this.queue.add(Message.mouseMove(x, y));
+            //DataManagerChannel.getInstance().sendMouseMotion(x, y);
         }else {
-            Log.d(TAG, "Unable to send mouse position screen not initialized");
+            Log.d(TAG, "input : Unable to send mouse position screen not initialized");
         }
-
     }
 
     private void sendMouseButtonUpdate(String buttonName, boolean isPressed) {
-        Log.d(TAG, "send mouse button update " + buttonName + " isPressed ?: " + isPressed);
-        DataManagerChannel.getInstance().sendMouseButton(buttonName, isPressed);
+        Log.d(TAG, "input : send mouse button update " + buttonName + " isPressed ?: " + isPressed);
+        if(isPressed) {
+            this.queue.add(Message.mouseButtonDown(buttonName));
+        } else {
+            this.queue.add(Message.mouseButtonUp(buttonName));
+        }
     }
 
     private boolean isMouseButtonStateChange(boolean mouseButton, Boolean previousMouseButtonState) {
@@ -72,7 +82,7 @@ class UserEventManager {
     }
 
     public boolean onTouchHandler(MotionEvent event) {
-        Log.d(TAG, "Touch event detected");
+        Log.d(TAG, "input: Touch event detected");
         sendMousePosition(event.getX(), event.getY());
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
@@ -82,6 +92,7 @@ class UserEventManager {
                 sendMouseButtonUpdate("left", false);
                 break;
         }
+        Log.d(TAG, "message queue: "+this.queue.size());
         return true;
     }
 
@@ -104,10 +115,10 @@ class UserEventManager {
     }
 
     public void keyDown(int keyCode) {
-        DataManagerChannel.getInstance().sendKeyDown(keyCode);
+        //DataManagerChannel.getInstance().sendKeyDown(keyCode);
     }
 
     public void keyUp(int keyCode) {
-        DataManagerChannel.getInstance().sendKeyUp(keyCode);
+        //DataManagerChannel.getInstance().sendKeyUp(keyCode);
     }
 }

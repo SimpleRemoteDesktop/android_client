@@ -29,17 +29,17 @@ public class DataManagerChannel {
     private OutputStream output;
 
 
-    public void connect(String hostname , int port) {
+    public void connect(String hostname, int port) {
         try {
 
-            Log.v("DataManager", "Connecting to socket" + hostname+":"+port);
+            Log.v("DataManager", "Connecting to socket" + hostname + ":" + port);
             final InetSocketAddress socketAddr = new InetSocketAddress(hostname, port);
             chan = SocketChannel.open();
             chan.connect(socketAddr);
             output = chan.socket().getOutputStream();
-            buf = ByteBuffer.allocate(2048*1024);
+            buf = ByteBuffer.allocate(2048 * 1024);
             buf.order(ByteOrder.LITTLE_ENDIAN);
-            buf.limit (0);
+            buf.limit(0);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -56,7 +56,7 @@ public class DataManagerChannel {
     }
 
     public static DataManagerChannel getInstance() {
-        if(instance == null) {
+        if (instance == null) {
             instance = new DataManagerChannel();
         }
         return instance;
@@ -73,16 +73,16 @@ public class DataManagerChannel {
             if (chan.isConnected()) {
                 ensure(4, chan);
                 frame.type = buf.getInt();
-                Log.d(TAG, "receiving frame number : "+ frame.type);
+                Log.d(TAG, "receiving frame number : " + frame.type);
                 ensure(4, chan);
                 frame.size = buf.getInt();
-                Log.d(TAG, "new frame size : "+frame.size);
+                Log.d(TAG, "new frame size : " + frame.size);
                 ensure(frame.size, chan);
                 frame.data = new byte[frame.size];
                 buf.get(frame.data, 0, frame.size);
-                Log.d(TAG, "new frame array length :"+frame.size);
+                Log.d(TAG, "new frame array length :" + frame.size);
             } else {
-                Log.d("VIDEO DECODER THREAD","Socket not connected reconnect");
+                Log.d("VIDEO DECODER THREAD", "Socket not connected reconnect");
 
             }
 
@@ -92,17 +92,16 @@ public class DataManagerChannel {
         return frame;
     }
 
-    private static void ensure (int len, ByteChannel chan) throws IOException
-    {
+    private static void ensure(int len, ByteChannel chan) throws IOException {
         int test = buf.remaining();
-        if (buf.remaining () < len) {
-            buf.compact ();
-            buf.flip ();
+        if (buf.remaining() < len) {
+            buf.compact();
+            buf.flip();
             do {
-                buf.position (buf.limit ());
-                buf.limit (buf.capacity ());
-                chan.read (buf);
-                buf.flip ();
+                buf.position(buf.limit());
+                buf.limit(buf.capacity());
+                chan.read(buf);
+                buf.flip();
             } while (buf.remaining() < len);
         }
     }
@@ -119,6 +118,15 @@ public class DataManagerChannel {
 
     }
 
+    public void send(Message m) {
+        try {
+            output.write(m.toBytes());
+            output.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void sendMouseMotion(float x, float y) {
         try {
             output.write(Message.mouseMove(x, y).toBytes());
@@ -129,7 +137,7 @@ public class DataManagerChannel {
     }
 
     public void sendMouseButton(String buttonName, boolean isPressed) {
-        if(isPressed) {
+        if (isPressed) {
             try {
                 output.write(Message.mouseButtonDown(buttonName).toBytes());
                 output.flush();
@@ -145,15 +153,16 @@ public class DataManagerChannel {
             }
         }
     }
+
     private void bytesToHex(byte[] bytes, int length) {
         StringBuilder sb = new StringBuilder();
         String result = "";
-        for (int i=0; i < length; i++) {
+        for (int i = 0; i < length; i++) {
             sb.append(String.format("%02X ", bytes[i]));
-            result +=" ";
-            result +=sb.toString();
+            result += " ";
+            result += sb.toString();
         }
-        Log.d(this.getClass().getName(), result+"\n");
+        Log.d(this.getClass().getName(), result + "\n");
     }
 
 /*    private byte[] NALparser() {
@@ -181,22 +190,22 @@ public class DataManagerChannel {
     }*/
 
     private boolean isPPS(int i) {
-        return net_in[i+4] == 0x68;
+        return net_in[i + 4] == 0x68;
     }
 
     private boolean nalStartCodeDected(int i) {
-        return net_in[i] == 0x00 && net_in[i+1] == 0x00 && net_in[i+2] == 0x00 && net_in[i+3]  == 0x01;
+        return net_in[i] == 0x00 && net_in[i + 1] == 0x00 && net_in[i + 2] == 0x00 && net_in[i + 3] == 0x01;
     }
 
     private void addToNetworkBuffer(byte[] dataAvaibleLength) {
         byte[] net_temp = new byte[dataAvaibleLength.length + net_in.length];
         System.arraycopy(net_in, 0, net_temp, 0, net_in.length);
-        System.arraycopy(dataAvaibleLength, 0, net_temp,net_in.length, dataAvaibleLength.length);
+        System.arraycopy(dataAvaibleLength, 0, net_temp, net_in.length, dataAvaibleLength.length);
         net_in = net_temp;
     }
 
     public void closeChannel() {
-        if(chan != null) {
+        if (chan != null) {
             try {
                 chan.close();
             } catch (IOException e) {
