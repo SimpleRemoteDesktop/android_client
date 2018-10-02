@@ -12,3 +12,15 @@ install:
   - echo y | sdkmanager "cmake;3.6.4111459"
   - echo y | sdkmanager "lldb;3.1"
   - echo y | sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout;1.0.0-alpha7"
+before_deploy:
+  # Set up git user name and tag this commit
+  - git config --local user.name "sylvain121"
+  - git config --local user.email "sylvain121 at gmail.com"
+  - git tag "$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)"
+deploy:
+  provider: releases
+  api_key: ${GITHUB_TOKEN}
+  file: "app/build/outputs/apk/debug/app-debug.apk"
+  skip_cleanup: true
+  on:
+    tags: true
