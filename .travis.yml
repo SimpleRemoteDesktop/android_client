@@ -1,4 +1,7 @@
 language: android
+branches:
+  only:
+    - master
 android:
   components:
     # The BuildTools version used by your project

@@ -17,8 +17,10 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.github.sylvain121.SimpleRemoteDesktop.MainActivity;
+import com.github.sylvain121.SimpleRemoteDesktop.player.sound.SoundDecoder;
 import com.github.sylvain121.SimpleRemoteDesktop.player.video.MediaCodecDecoderRenderer;
 import com.github.sylvain121.SimpleRemoteDesktop.settings.SettingsActivity;
+import com.score.rahasak.utils.OpusDecoder;
 
 import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -117,8 +119,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
         Log.d(TAG, "Start H264 encoder");
         mediaCodec.start();
         Log.d(TAG, "start audio decoder");
-        //SoundDecoder sound = new SoundDecoder(48000, 2, this.soundQueue);
-        //sound.start();
+        SoundDecoder sound = new SoundDecoder(48000, 2, this.soundQueue);
         Log.d(TAG, "init  network thread");
         cnx = new ConnectionThread(width, height, this.IPAddress, sharedPreference, inputNetworkQueue, videoQueue, soundQueue);
         cnx.setDecoderHandler(mediaCodec);
