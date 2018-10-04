@@ -18,6 +18,7 @@ import android.view.WindowManager;
 
 import com.github.sylvain121.SimpleRemoteDesktop.MainActivity;
 import com.github.sylvain121.SimpleRemoteDesktop.player.sound.SoundDecoder;
+import com.github.sylvain121.SimpleRemoteDesktop.player.sound.SoundDecoderThread;
 import com.github.sylvain121.SimpleRemoteDesktop.player.video.MediaCodecDecoderRenderer;
 import com.github.sylvain121.SimpleRemoteDesktop.settings.SettingsActivity;
 import com.score.rahasak.utils.OpusDecoder;
@@ -36,6 +37,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
     private LinkedList<Message> inputNetworkQueue;
     private LinkedList<Frame> soundQueue;
     private LinkedList<Frame> videoQueue;
+    private SoundDecoderThread soundThread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,7 +121,8 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
         Log.d(TAG, "Start H264 encoder");
         mediaCodec.start();
         Log.d(TAG, "start audio decoder");
-        SoundDecoder sound = new SoundDecoder(48000, 2, this.soundQueue);
+        soundThread = new SoundDecoderThread(48000, 2, this.soundQueue);
+        soundThread.start();
         Log.d(TAG, "init  network thread");
         cnx = new ConnectionThread(width, height, this.IPAddress, sharedPreference, inputNetworkQueue, videoQueue, soundQueue);
         cnx.setDecoderHandler(mediaCodec);

@@ -18,7 +18,7 @@ public class SoundDecoder {
     private final AudioTrack track;
     private final OpusDecoder decoder;
 
-    public SoundDecoder(int sampleRate, int channels, LinkedList<Frame> soundQueue) {
+    public SoundDecoder(int sampleRate, int channels) {
 
         this.sampleRate = sampleRate;
         this.channels = channels;
