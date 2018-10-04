@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.hardware.input.InputManager;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.InputDevice;
@@ -89,7 +90,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
         Intent intent = getIntent();
         this.IPAddress = intent.getStringExtra(MainActivity.IP_ADDRESS);
         Log.d(TAG, "server address : "+this.IPAddress);
-
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
 
     }
