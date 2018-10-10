@@ -41,6 +41,8 @@ public class SoundDecoder {
         decoder = new OpusDecoder();
         decoder.init(sampleRate, channels);
         Log.d(TAG, "Creating new sound decoder");
+        track.setPlaybackRate(sampleRate);
+        track.play();
     }
 
     public void decodeFrame(byte[] inBuffer) {
