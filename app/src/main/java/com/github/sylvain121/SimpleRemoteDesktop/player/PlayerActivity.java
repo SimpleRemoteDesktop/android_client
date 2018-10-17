@@ -24,6 +24,7 @@ import com.github.sylvain121.SimpleRemoteDesktop.player.video.MediaCodecDecoderR
 import com.github.sylvain121.SimpleRemoteDesktop.settings.SettingsActivity;
 import com.score.rahasak.utils.OpusDecoder;
 
+import java.io.StringWriter;
 import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -58,6 +59,13 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
         SurfaceView sv = new SurfaceView(this);
         sv.getHolder().addCallback(this);
 
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread thread, Throwable throwable) {
+                handleUncaughtException(thread, throwable);
+            }
+        });
+
         this.soundQueue = new LinkedList<Frame>();
         this.videoQueue = new LinkedList<Frame>();
         this.inputNetworkQueue = new LinkedList<Message>();
@@ -69,7 +77,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
         sv.setOnGenericMotionListener(new View.OnGenericMotionListener() {
             @Override
             public boolean onGenericMotion(View v, MotionEvent event) {
-                Log.d(TAG, "event : "+event.getButtonState());
+                Log.d(TAG, "event : " + event.getButtonState());
                 return userEventManager.genericMouseHandler(event);
 
             }
@@ -78,8 +86,8 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
         sv.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                Log.d(TAG, "touch event : "+event.getButtonState());
-                if(event.getDevice().getSources() != InputDevice.SOURCE_MOUSE) {
+                Log.d(TAG, "touch event : " + event.getButtonState());
+                if (event.getDevice().getSources() != InputDevice.SOURCE_MOUSE) {
                     return userEventManager.onTouchHandler(event);
                 } else {
                     return userEventManager.genericMouseHandler(event);
@@ -89,10 +97,37 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
 
         Intent intent = getIntent();
         this.IPAddress = intent.getStringExtra(MainActivity.IP_ADDRESS);
-        Log.d(TAG, "server address : "+this.IPAddress);
+        Log.d(TAG, "server address : " + this.IPAddress);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
 
+        View decorView = getWindow().getDecorView();
+        decorView.setOnSystemUiVisibilityChangeListener
+                (new View.OnSystemUiVisibilityChangeListener() {
+                    @Override
+                    public void onSystemUiVisibilityChange(int visibility) {
+                        // Note that system bars will only be "visible" if none of the
+                        // LOW_PROFILE, HIDE_NAVIGATION, or FULLSCREEN flags are set.
+                        if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
+                            getWindow().getDecorView().setSystemUiVisibility(
+                                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+                        } else {
+                            // TODO: The system bars are NOT visible. Make any desired
+                            // adjustments to your UI, such as hiding the action bar or
+                            // other navigational controls.
+                        }
+                    }
+                });
+    }
+
+    private void handleUncaughtException(Thread thread, Throwable throwable) {
+        throwable.printStackTrace();
+        Intent intent = new Intent();
+        intent.setAction("com.github.sylvain121.SEND_MAIL");
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        System.exit(1);
     }
 
     @Override
@@ -103,12 +138,12 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 
-        if(mediaCodec != null || cnx != null) {
+        if (mediaCodec != null || cnx != null) {
             mediaCodec.stop();
             cnx.close();
         }
 
-        Log.d(TAG, "width : "+width+ "height : "+height);
+        Log.d(TAG, "width : " + width + "height : " + height);
 
         SharedPreferences sharedPreference = getBaseContext().getSharedPreferences(SettingsActivity.SIMPLE_REMOTE_DESKTOP_PREF, 0);
         Log.d(TAG, "start h264 decoder");
@@ -139,7 +174,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
     @Override
     public void onInputDeviceAdded(int deviceId) {
         InputDevice device = InputDevice.getDevice(deviceId);
-        if(device.getSources() == InputDevice.SOURCE_MOUSE) {
+        if (device.getSources() == InputDevice.SOURCE_MOUSE) {
             Log.d(TAG, "Mouse plugged");
             this.MouseIsPresent = true;
         }
@@ -148,7 +183,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
     @Override
     public void onInputDeviceRemoved(int deviceId) {
         InputDevice device = InputDevice.getDevice(deviceId);
-        if(device.getSources() == InputDevice.SOURCE_MOUSE) {
+        if (device.getSources() == InputDevice.SOURCE_MOUSE) {
             Log.d(TAG, "Mouse Changed");
 
         }
@@ -157,7 +192,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
     @Override
     public void onInputDeviceChanged(int deviceId) {
         InputDevice device = InputDevice.getDevice(deviceId);
-        if(device.getSources() == InputDevice.SOURCE_MOUSE) {
+        if (device.getSources() == InputDevice.SOURCE_MOUSE) {
             Log.d(TAG, "Mouse Unplugged");
             this.MouseIsPresent = false;
         }
@@ -165,14 +200,14 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent keyEvent) {
-        Log.d(TAG, "key down "+keyCode);
+        Log.d(TAG, "key down " + keyCode);
         //userEventManager.keyDown(keyCode);
         return false;
     }
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent keyEvent) {
-        Log.d(TAG, "key up "+keyCode);
+        Log.d(TAG, "key up " + keyCode);
         //userEventManager.keyUp(keyCode);
         return false;
     }

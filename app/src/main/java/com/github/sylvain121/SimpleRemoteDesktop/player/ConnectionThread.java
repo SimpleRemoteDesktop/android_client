@@ -9,6 +9,7 @@ import com.github.sylvain121.SimpleRemoteDesktop.settings.SettingsActivity;
 
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.NoSuchElementException;
 import java.util.concurrent.LinkedBlockingDeque;
 
 /**
@@ -89,10 +90,15 @@ class ConnectionThread extends Thread {
                     this.soundQueue.add(frame);
                     Log.d(TAG, "New Audio frame, queue size : " + this.soundQueue.size());
             }
-            while(!this.inputQueue.isEmpty()) {
-                Message m = this.inputQueue.poll();
-                Log.d(TAG, "send new input event");
-                m_renderSock.send(m);
+            while (!this.inputQueue.isEmpty()) {
+                try {
+                    Message m = this.inputQueue.poll();
+                    Log.d(TAG, "send new input event");
+                    m_renderSock.send(m);
+                } catch (NoSuchElementException e) {
+                    Log.d(TAG, "input queue is empty");
+                }
+
             }
         }
     }

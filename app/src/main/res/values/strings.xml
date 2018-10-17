@@ -6,4 +6,5 @@
     <string name="stream_bitrate">video bitrate</string>
     <string name="fps">frame rate</string>
     <string name="title_activity_quick_connect">QuickConnectActivity</string>
+    <string name="title_activity_send_log">SendLog</string>
 </resources>
