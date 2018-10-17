@@ -38,10 +38,6 @@
             android:name=".QuickConnectActivity"
             android:label="@string/title_activity_quick_connect"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".log.SendLog"
-            android:label="@string/title_activity_send_log"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
