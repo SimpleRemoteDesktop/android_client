@@ -13,15 +13,17 @@ import android.widget.TextView;
 import com.github.sylvain121.SimpleRemoteDesktop.R;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
-public class ServerAdapter extends ArrayAdapter<Server> {
+public class ServerAdapter extends ArrayAdapter<String> {
 
 
     private final Context context;
     private final int resource;
-    private final ArrayList<Server> data;
+    private final List<String> data;
 
-    public ServerAdapter(@NonNull Context context, @LayoutRes int resource, @NonNull ArrayList<Server> objects) {
+    public ServerAdapter(@NonNull Context context, @LayoutRes int resource, @NonNull List<String> objects) {
         super(context, resource, objects);
         this.context = context;
         this.resource = resource;
@@ -36,7 +38,6 @@ public class ServerAdapter extends ArrayAdapter<Server> {
             LayoutInflater inflater = ((Activity)context).getLayoutInflater();
             row = inflater.inflate(resource, parent, false);
             holder.hostname = (TextView) row.findViewById(R.id.hostname);
-            holder.os = (TextView) row.findViewById(R.id.os);
 
             row.setTag(holder);
         }
@@ -44,9 +45,8 @@ public class ServerAdapter extends ArrayAdapter<Server> {
             holder = (ServerHolder) row.getTag();
         }
 
-        Server server = data.get(position);
-        holder.hostname.setText(server.name);
-        holder.os.setText(server.os);
+        String server = data.get(position);
+        holder.hostname.setText(server);
 
         return row;
 
@@ -54,6 +54,5 @@ public class ServerAdapter extends ArrayAdapter<Server> {
 
     class ServerHolder {
         TextView hostname;
-        TextView os;
     }
 }
