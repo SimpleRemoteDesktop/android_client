@@ -107,10 +107,10 @@ public class DataManagerChannel {
     }
 
 
-    public void sendStartStream(int width, int height, int fps, int codec_width, int codec_height, int bandwidth) {
+    public void sendStartStream(int fps, int codec_width, int codec_height, int bandwidth) {
         try {
             Log.d(TAG, "send start message");
-            output.write(Message.startStream(width, height, fps, codec_width, codec_height, bandwidth).toBytes());
+            output.write(Message.startStream(fps, codec_width, codec_height, bandwidth).toBytes());
             output.flush();
         } catch (IOException e) {
             e.printStackTrace();

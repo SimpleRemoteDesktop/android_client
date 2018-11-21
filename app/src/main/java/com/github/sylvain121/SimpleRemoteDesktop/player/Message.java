@@ -65,7 +65,7 @@ public class Message {
         this.fps = fps;
     }
 
-    public static Message startStream(int width, int height, int fps, int codec_width, int codec_height, int bandwidth) {
+    public static Message startStream(int fps, int codec_width, int codec_height, int bandwidth) {
         Message message = new Message();
         message.type = TYPE_ENCODER_START;
         message.fps = fps;

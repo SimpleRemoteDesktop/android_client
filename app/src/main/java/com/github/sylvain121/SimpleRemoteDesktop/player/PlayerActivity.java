@@ -7,6 +7,7 @@ import android.content.pm.ActivityInfo;
 import android.hardware.input.InputManager;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.InputDevice;
 import android.view.KeyEvent;
@@ -18,14 +19,12 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.github.sylvain121.SimpleRemoteDesktop.MainActivity;
-import com.github.sylvain121.SimpleRemoteDesktop.player.sound.SoundDecoder;
 import com.github.sylvain121.SimpleRemoteDesktop.player.sound.SoundDecoderThread;
 import com.github.sylvain121.SimpleRemoteDesktop.player.video.MediaCodecDecoderRenderer;
+import com.github.sylvain121.SimpleRemoteDesktop.player.video.VideoDecoderThread;
 import com.github.sylvain121.SimpleRemoteDesktop.settings.SettingsActivity;
-import com.score.rahasak.utils.OpusDecoder;
 
 import java.util.LinkedList;
-import java.util.concurrent.LinkedBlockingDeque;
 
 public class PlayerActivity extends Activity implements SurfaceHolder.Callback, InputManager.InputDeviceListener {
 
@@ -33,12 +32,16 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
     private String TAG = "PLAYER ACTIVITY";
     private String IPAddress;
     private boolean MouseIsPresent = false;
-    private MediaCodecDecoderRenderer mediaCodec;
-    private ConnectionThread cnx;
+    private ConnectionThread connectionThread;
     private LinkedList<Message> inputNetworkQueue;
     private LinkedList<Frame> soundQueue;
     private LinkedList<Frame> videoQueue;
     private SoundDecoderThread soundThread;
+    private int codec_width = 800;
+    private int codec_height = 600;
+    private int bandwidth = 1000000;
+    private int fps = 30;
+    private VideoDecoderThread videoThread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,9 +61,36 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
         SurfaceView sv = new SurfaceView(this);
         sv.getHolder().addCallback(this);
 
-        this.soundQueue = new LinkedList<Frame>();
-        this.videoQueue = new LinkedList<Frame>();
-        this.inputNetworkQueue = new LinkedList<Message>();
+        Intent intent = getIntent();
+        this.IPAddress = intent.getStringExtra(MainActivity.IP_ADDRESS);
+        Log.d(TAG, "server address : " + this.IPAddress);
+
+        this.soundQueue = new LinkedList<>();
+        this.videoQueue = new LinkedList<>();
+        this.inputNetworkQueue = new LinkedList<>();
+        SharedPreferences sharedPreference = getBaseContext().getSharedPreferences(SettingsActivity.SIMPLE_REMOTE_DESKTOP_PREF, 0);
+
+
+        String currentResolution = sharedPreference.getString(SettingsActivity.SIMPLE_REMOTE_DESKTOP_PREF_RESOLUTION, null);
+
+        switch (currentResolution) {
+            case "600p":
+                this.codec_width = 800;
+                this.codec_height = 600;
+                break;
+            case "720p":
+                codec_width = 1280;
+                codec_height = 720;
+                break;
+            case "1080p":
+                codec_width = 1920;
+                codec_height = 1080;
+                break;
+        }
+
+
+        bandwidth = sharedPreference.getInt(SettingsActivity.SIMPLE_REMOTE_DESKTOP_PREF_BITRATE, 0);
+        fps = sharedPreference.getInt(SettingsActivity.SIMPLE_REMOTE_DESKTOP_PREF_FPS, 0);
 
         userEventManager = new UserEventManager(inputNetworkQueue);
 
@@ -69,7 +99,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
         sv.setOnGenericMotionListener(new View.OnGenericMotionListener() {
             @Override
             public boolean onGenericMotion(View v, MotionEvent event) {
-                Log.d(TAG, "event : "+event.getButtonState());
+                Log.d(TAG, "event : " + event.getButtonState());
                 return userEventManager.genericMouseHandler(event);
 
             }
@@ -78,8 +108,8 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
         sv.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                Log.d(TAG, "touch event : "+event.getButtonState());
-                if(event.getDevice().getSources() != InputDevice.SOURCE_MOUSE) {
+                Log.d(TAG, "touch event : " + event.getButtonState());
+                if (event.getDevice().getSources() != InputDevice.SOURCE_MOUSE) {
                     return userEventManager.onTouchHandler(event);
                 } else {
                     return userEventManager.genericMouseHandler(event);
@@ -87,9 +117,13 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
             }
         });
 
-        Intent intent = getIntent();
-        this.IPAddress = intent.getStringExtra(MainActivity.IP_ADDRESS);
-        Log.d(TAG, "server address : "+this.IPAddress);
+
+        soundThread = new SoundDecoderThread(48000, 2, this.soundQueue);
+        soundThread.start();
+        connectionThread = new ConnectionThread(this.inputNetworkQueue, this.videoQueue, this.soundQueue);
+        connectionThread.start();
+
+
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
 
@@ -102,34 +136,19 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
-        if(mediaCodec != null || cnx != null) {
-            mediaCodec.stop();
-            cnx.close();
+        if(videoThread != null) {
+            this.videoThread.close();
+            try {
+                this.videoThread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace(); //FIXME
+            }
         }
+        videoThread = new VideoDecoderThread(videoQueue, width, height, holder);
+        videoThread.start();
 
-        Log.d(TAG, "width : "+width+ "height : "+height);
-
-        SharedPreferences sharedPreference = getBaseContext().getSharedPreferences(SettingsActivity.SIMPLE_REMOTE_DESKTOP_PREF, 0);
-        Log.d(TAG, "start h264 decoder");
-        mediaCodec = new MediaCodecDecoderRenderer();
-        Log.d(TAG, "Set render target");
-        mediaCodec.setRenderTarget(holder);
-        Log.d(TAG, "set H264 codec parameter");
-        mediaCodec.setup(width, height);
-
-        userEventManager.setScreenSize(width, height);
-        Log.d(TAG, "Start H264 encoder");
-        mediaCodec.start();
-        Log.d(TAG, "start audio decoder");
-        soundThread = new SoundDecoderThread(48000, 2, this.soundQueue);
-        soundThread.start();
-        Log.d(TAG, "init  network thread");
-        cnx = new ConnectionThread(width, height, this.IPAddress, sharedPreference, inputNetworkQueue, videoQueue, soundQueue);
-        cnx.setDecoderHandler(mediaCodec);
-        Log.d(TAG, "start network thread");
-        cnx.start();
-    }
+       userEventManager.setScreenSize(width, height);
+   }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
@@ -139,7 +158,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
     @Override
     public void onInputDeviceAdded(int deviceId) {
         InputDevice device = InputDevice.getDevice(deviceId);
-        if(device.getSources() == InputDevice.SOURCE_MOUSE) {
+        if (device.getSources() == InputDevice.SOURCE_MOUSE) {
             Log.d(TAG, "Mouse plugged");
             this.MouseIsPresent = true;
         }
@@ -148,7 +167,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
     @Override
     public void onInputDeviceRemoved(int deviceId) {
         InputDevice device = InputDevice.getDevice(deviceId);
-        if(device.getSources() == InputDevice.SOURCE_MOUSE) {
+        if (device.getSources() == InputDevice.SOURCE_MOUSE) {
             Log.d(TAG, "Mouse Changed");
 
         }
@@ -157,7 +176,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
     @Override
     public void onInputDeviceChanged(int deviceId) {
         InputDevice device = InputDevice.getDevice(deviceId);
-        if(device.getSources() == InputDevice.SOURCE_MOUSE) {
+        if (device.getSources() == InputDevice.SOURCE_MOUSE) {
             Log.d(TAG, "Mouse Unplugged");
             this.MouseIsPresent = false;
         }
@@ -165,14 +184,14 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent keyEvent) {
-        Log.d(TAG, "key down "+keyCode);
+        Log.d(TAG, "key down " + keyCode);
         //userEventManager.keyDown(keyCode);
         return false;
     }
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent keyEvent) {
-        Log.d(TAG, "key up "+keyCode);
+        Log.d(TAG, "key up " + keyCode);
         //userEventManager.keyUp(keyCode);
         return false;
     }
