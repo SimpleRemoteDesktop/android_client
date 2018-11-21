@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.github.sylvain121.SimpleRemoteDesktop.CrashLogger;
 import com.github.sylvain121.SimpleRemoteDesktop.MainActivity;
 import com.github.sylvain121.SimpleRemoteDesktop.player.sound.SoundDecoder;
 import com.github.sylvain121.SimpleRemoteDesktop.player.sound.SoundDecoderThread;
@@ -122,12 +123,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
     }
 
     private void handleUncaughtException(Thread thread, Throwable throwable) {
-        throwable.printStackTrace();
-        Intent intent = new Intent();
-        intent.setAction("com.github.sylvain121.SEND_MAIL");
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-        System.exit(1);
+        startActivity(CrashLogger.reportCrash(throwable, thread.getName()));
     }
 
     @Override
