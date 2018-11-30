@@ -71,12 +71,14 @@ public class VideoDecoderThread extends Thread {
                 this.submitFrame(frame.data);
             } else {
                 try {
-                    Thread.sleep(1);
+                    Thread.sleep(1); //FIXME
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
         }
+        this.mediaCodec.stop();
+        this.mediaCodec.cleanup();
         //FIXME stop
     }
 

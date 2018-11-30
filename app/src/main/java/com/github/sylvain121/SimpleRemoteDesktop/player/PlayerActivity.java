@@ -61,6 +61,11 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
         SurfaceView sv = new SurfaceView(this);
         sv.getHolder().addCallback(this);
 
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        setContentView(sv);
+
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
         Intent intent = getIntent();
         this.IPAddress = intent.getStringExtra(MainActivity.IP_ADDRESS);
         Log.d(TAG, "server address : " + this.IPAddress);
@@ -68,9 +73,49 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
         this.soundQueue = new LinkedList<>();
         this.videoQueue = new LinkedList<>();
         this.inputNetworkQueue = new LinkedList<>();
+
+        setStreamParameters();
+        setEventHandler(sv);
+
+
+        soundThread = new SoundDecoderThread(48000, 2, this.soundQueue);
+        soundThread.start();
+        connectionThread = new ConnectionThread(this.IPAddress, 8001,
+                this.inputNetworkQueue, this.videoQueue, this.soundQueue);
+        connectionThread.start();
+
+
+
+
+    }
+
+    private void setEventHandler(SurfaceView sv) {
+        userEventManager = new UserEventManager(inputNetworkQueue);
+
+        sv.setOnGenericMotionListener(new View.OnGenericMotionListener() {
+             @Override
+             public boolean onGenericMotion(View v, MotionEvent event) {
+                 Log.d(TAG, "event : " + event.getButtonState());
+                 return userEventManager.genericMouseHandler(event);
+
+             }
+         });
+
+        sv.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                Log.d(TAG, "touch event : " + event.getButtonState());
+                if (event.getDevice().getSources() != InputDevice.SOURCE_MOUSE) {
+                    return userEventManager.onTouchHandler(event);
+                } else {
+                    return userEventManager.genericMouseHandler(event);
+                }
+            }
+        });
+    }
+
+    private void setStreamParameters() {
         SharedPreferences sharedPreference = getBaseContext().getSharedPreferences(SettingsActivity.SIMPLE_REMOTE_DESKTOP_PREF, 0);
-
-
         String currentResolution = sharedPreference.getString(SettingsActivity.SIMPLE_REMOTE_DESKTOP_PREF_RESOLUTION, null);
 
         switch (currentResolution) {
@@ -91,52 +136,17 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
 
         bandwidth = sharedPreference.getInt(SettingsActivity.SIMPLE_REMOTE_DESKTOP_PREF_BITRATE, 0);
         fps = sharedPreference.getInt(SettingsActivity.SIMPLE_REMOTE_DESKTOP_PREF_FPS, 0);
-
-        userEventManager = new UserEventManager(inputNetworkQueue);
-
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        setContentView(sv);
-        sv.setOnGenericMotionListener(new View.OnGenericMotionListener() {
-            @Override
-            public boolean onGenericMotion(View v, MotionEvent event) {
-                Log.d(TAG, "event : " + event.getButtonState());
-                return userEventManager.genericMouseHandler(event);
-
-            }
-        });
-
-        sv.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                Log.d(TAG, "touch event : " + event.getButtonState());
-                if (event.getDevice().getSources() != InputDevice.SOURCE_MOUSE) {
-                    return userEventManager.onTouchHandler(event);
-                } else {
-                    return userEventManager.genericMouseHandler(event);
-                }
-            }
-        });
-
-
-        soundThread = new SoundDecoderThread(48000, 2, this.soundQueue);
-        soundThread.start();
-        connectionThread = new ConnectionThread(this.inputNetworkQueue, this.videoQueue, this.soundQueue);
-        connectionThread.start();
-
-
-        setVolumeControlStream(AudioManager.STREAM_MUSIC);
-
-
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         Log.d("SURFACE", "SURFACE CREATED");
+        this.connectionThread.sendStartPacket(this.codec_width, this.codec_height, this.bandwidth, this.fps);
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        if(videoThread != null) {
+        if (videoThread != null) {
             this.videoThread.close();
             try {
                 this.videoThread.join();
@@ -147,8 +157,8 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
         videoThread = new VideoDecoderThread(videoQueue, width, height, holder);
         videoThread.start();
 
-       userEventManager.setScreenSize(width, height);
-   }
+        userEventManager.setScreenSize(width, height);
+    }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {

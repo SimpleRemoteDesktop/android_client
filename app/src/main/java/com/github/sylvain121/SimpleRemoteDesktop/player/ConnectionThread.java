@@ -16,13 +16,16 @@ class ConnectionThread extends Thread {
     private final LinkedList<Message> inputQueue;
     private final LinkedList<Frame> videoQueue;
     private final LinkedList<Frame> soundQueue;
+    private final int port;
     private DataManagerChannel m_renderSock;
     private int FrameNumber = 0;
 
     private final static String TAG = "CONNEXION_THREAD";
+    private String hostname;
 
-    public ConnectionThread(LinkedList<Message> inputNetworkQueue, LinkedList<Frame> videoQueue, LinkedList<Frame> soundQueue) {
-
+    public ConnectionThread(String hostname,int port, LinkedList<Message> inputNetworkQueue, LinkedList<Frame> videoQueue, LinkedList<Frame> soundQueue) {
+        this.hostname = hostname;
+        this.port = port;
         this.inputQueue = inputNetworkQueue;
         this.videoQueue = videoQueue;
         this.soundQueue = soundQueue;
@@ -48,6 +51,7 @@ class ConnectionThread extends Thread {
     @Override
     public void run() {
 
+        this.connect(this.hostname, port);
         while (!Thread.interrupted()) {
             Frame frame = m_renderSock.receive();
             switch (frame.type) {
@@ -59,6 +63,11 @@ class ConnectionThread extends Thread {
                     Log.d(TAG, "New audio frame");
                     this.soundQueue.add(frame);
                     Log.d(TAG, "New Audio frame, queue size : " + this.soundQueue.size());
+                    break;
+                case Frame.DIMENSION_FRAME:
+                    Log.d(TAG, "dimension frame received");
+                    break;
+
             }
             while (!this.inputQueue.isEmpty()) {
                 Message m = this.inputQueue.poll();
