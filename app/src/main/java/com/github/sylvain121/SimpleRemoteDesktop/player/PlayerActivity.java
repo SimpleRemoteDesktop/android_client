@@ -25,6 +25,7 @@ import com.github.sylvain121.SimpleRemoteDesktop.player.video.MediaCodecDecoderR
 import com.github.sylvain121.SimpleRemoteDesktop.settings.SettingsActivity;
 import com.score.rahasak.utils.OpusDecoder;
 
+import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -112,7 +113,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
                         if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
                             getWindow().getDecorView().setSystemUiVisibility(
                                     View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+                                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
                         } else {
                             // TODO: The system bars are NOT visible. Make any desired
                             // adjustments to your UI, such as hiding the action bar or
@@ -123,7 +124,16 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
     }
 
     private void handleUncaughtException(Thread thread, Throwable throwable) {
-        startActivity(CrashLogger.reportCrash(throwable, thread.getName()));
+
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        throwable.printStackTrace(pw);
+        String sStackTrace = sw.toString(); // stack trace as a string
+
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, sStackTrace);
+        startActivity(Intent.createChooser(intent, "Send crash log"));
     }
 
     @Override
