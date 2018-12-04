@@ -141,7 +141,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         Log.d("SURFACE", "SURFACE CREATED");
-        this.connectionThread.sendStartPacket(this.codec_width, this.codec_height, this.bandwidth, this.fps);
+        this.connectionThread.setConnectionParameters(this.codec_width, this.codec_height, this.bandwidth, this.fps);
     }
 
     @Override

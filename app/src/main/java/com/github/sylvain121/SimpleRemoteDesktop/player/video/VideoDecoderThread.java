@@ -23,8 +23,8 @@ public class VideoDecoderThread extends Thread {
         this.videoQueue = videoQueue;
         this.mediaCodec = new MediaCodecDecoderRenderer();
 
-        this.mediaCodec.setup(this.width, this.height);
         this.mediaCodec.setRenderTarget(this.surface);
+        this.mediaCodec.setup(this.width, this.height);
     }
 
 

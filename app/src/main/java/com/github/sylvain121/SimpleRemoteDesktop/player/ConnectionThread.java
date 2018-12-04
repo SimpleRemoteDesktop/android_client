@@ -3,9 +3,7 @@ package com.github.sylvain121.SimpleRemoteDesktop.player;
 import android.util.Log;
 
 import com.github.sylvain121.SimpleRemoteDesktop.player.network.DataManagerChannel;
-import com.github.sylvain121.SimpleRemoteDesktop.player.video.MediaCodecDecoderRenderer;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 
 /**
@@ -22,8 +20,12 @@ class ConnectionThread extends Thread {
 
     private final static String TAG = "CONNEXION_THREAD";
     private String hostname;
+    private int fps;
+    private int codecWidth;
+    private int codecHeight;
+    private int bandwidth;
 
-    public ConnectionThread(String hostname,int port, LinkedList<Message> inputNetworkQueue, LinkedList<Frame> videoQueue, LinkedList<Frame> soundQueue) {
+    public ConnectionThread(String hostname, int port, LinkedList<Message> inputNetworkQueue, LinkedList<Frame> videoQueue, LinkedList<Frame> soundQueue) {
         this.hostname = hostname;
         this.port = port;
         this.inputQueue = inputNetworkQueue;
@@ -42,16 +44,25 @@ class ConnectionThread extends Thread {
 
     }
 
-    public void sendStartPacket(int codecWidth, int codecHeight, int  bandwidth, int fps) {
-        Log.d(TAG, "Send start message");
-        m_renderSock.sendStartStream(fps, codecWidth, codecHeight, bandwidth);
+    public void setConnectionParameters(int codecWidth, int codecHeight, int bandwidth, int fps) {
+        this.codecHeight = codecHeight;
+        this.codecWidth = codecWidth;
+        this.bandwidth = bandwidth;
+        this.fps = fps;
+        //FIXME do something when changing parameters
 
+    }
+
+    public void sendStartPacket() {
+        Log.d(TAG, "Send start message");
+        m_renderSock.sendStartStream(this.fps, this.codecWidth, this.codecHeight, this.bandwidth);
     }
 
     @Override
     public void run() {
 
         this.connect(this.hostname, port);
+        this.sendStartPacket();
         while (!Thread.interrupted()) {
             Frame frame = m_renderSock.receive();
             switch (frame.type) {
@@ -78,7 +89,7 @@ class ConnectionThread extends Thread {
     }
 
 
-   public void close() {
+    public void close() {
         m_renderSock.closeChannel();
     }
 }
