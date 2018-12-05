@@ -27,7 +27,7 @@ public class Message {
     private int codec_height = 0;
     private int bandwidth = 0;
     private int fps = 0;
-    private static int sdl = 0; // always to 0 not a sdl client
+    private static int mouse = 1; // always to 0 not a mouse client
 
     public int getType() {
         return this.type;
@@ -94,7 +94,7 @@ public class Message {
         bb.putInt(codec_height);
         bb.putInt(bandwidth);
         bb.putInt(fps);
-        bb.putInt(sdl);
+        bb.putInt(mouse);
         return bb.array();
     }
 
@@ -113,7 +113,7 @@ public class Message {
         bb.putInt(codec_height);
         bb.putInt(bandwidth);
         bb.putInt(fps);
-        bb.putInt(sdl);
+        bb.putInt(mouse);
 
         bb.flip();
 
