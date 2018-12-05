@@ -63,13 +63,6 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
         SurfaceView sv = new SurfaceView(this);
         sv.getHolder().addCallback(this);
 
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread thread, Throwable throwable) {
-                handleUncaughtException(thread, throwable);
-            }
-        });
-
         this.soundQueue = new LinkedList<Frame>();
         this.videoQueue = new LinkedList<Frame>();
         this.inputNetworkQueue = new LinkedList<Message>();
@@ -109,13 +102,8 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
             public boolean onGenericMotion(View v, MotionEvent event) {
                 Log.d(TAG, "event : " + event.getButtonState());
                 return userEventManager.genericMouseHandler(event);
-             @Override
-             public boolean onGenericMotion(View v, MotionEvent event) {
-                 Log.d(TAG, "event : " + event.getButtonState());
-                 return userEventManager.genericMouseHandler(event);
-
-             }
-         });
+            }
+        });
 
         sv.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -130,7 +118,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
         });
     }
 
-        private void setStreamParameters(){
+    private void setStreamParameters() {
         SharedPreferences sharedPreference = getBaseContext().getSharedPreferences(SettingsActivity.SIMPLE_REMOTE_DESKTOP_PREF, 0);
         String currentResolution = sharedPreference.getString(SettingsActivity.SIMPLE_REMOTE_DESKTOP_PREF_RESOLUTION, null);
 
@@ -181,8 +169,6 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
         intent.putExtra(Intent.EXTRA_TEXT, sStackTrace);
         startActivity(Intent.createChooser(intent, "Send crash log"));
 
-        bandwidth = sharedPreference.getInt(SettingsActivity.SIMPLE_REMOTE_DESKTOP_PREF_BITRATE, 0);
-        fps = sharedPreference.getInt(SettingsActivity.SIMPLE_REMOTE_DESKTOP_PREF_FPS, 0);
     }
 
     @Override
@@ -192,7 +178,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        Log.d(TAG, "Surface changed width: "+ width+" height: "+height);
+        Log.d(TAG, "Surface changed width: " + width + " height: " + height);
         //FIXME life cycle of surface and stream
         if (videoThread != null) {
             this.videoThread.close();
@@ -201,71 +187,58 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
             } catch (InterruptedException e) {
                 e.printStackTrace(); //FIXME
             }
-
-        if (mediaCodec != null || cnx != null) {
-            mediaCodec.stop();
-            cnx.close();
         }
 
-        Log.d(TAG, "width : " + width + "height : " + height);
+            videoThread = new VideoDecoderThread(videoQueue, width, height, holder);
+            videoThread.start();
 
-        SharedPreferences sharedPreference = getBaseContext().getSharedPreferences(SettingsActivity.SIMPLE_REMOTE_DESKTOP_PREF, 0);
-        Log.d(TAG, "start h264 decoder");
-        mediaCodec = new MediaCodecDecoderRenderer();
-        Log.d(TAG, "Set render target");
-        mediaCodec.setRenderTarget(holder);
-        Log.d(TAG, "set H264 codec parameter");
-        mediaCodec.setup(width, height);
-        videoThread = new VideoDecoderThread(videoQueue, width, height, holder);
-        videoThread.start();
+            userEventManager.setScreenSize(width, height);
+            this.connectionThread.sendStartPacket(this.codec_width, this.codec_height, this.bandwidth, this.fps);
+        }
 
-        userEventManager.setScreenSize(width, height);
-        this.connectionThread.sendStartPacket(this.codec_width, this.codec_height, this.bandwidth, this.fps);
-    }
+        @Override
+        public void surfaceDestroyed (SurfaceHolder holder){
+            Log.d(TAG, "SURFACE DESTROYED");
+        }
 
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        Log.d(TAG, "SURFACE DESTROYED");
-    }
+        @Override
+        public void onInputDeviceAdded ( int deviceId){
+            InputDevice device = InputDevice.getDevice(deviceId);
+            if (device.getSources() == InputDevice.SOURCE_MOUSE) {
+                Log.d(TAG, "Mouse plugged");
+                this.MouseIsPresent = true;
+            }
+        }
 
-    @Override
-    public void onInputDeviceAdded(int deviceId) {
-        InputDevice device = InputDevice.getDevice(deviceId);
-        if (device.getSources() == InputDevice.SOURCE_MOUSE) {
-            Log.d(TAG, "Mouse plugged");
-            this.MouseIsPresent = true;
+        @Override
+        public void onInputDeviceRemoved ( int deviceId){
+            InputDevice device = InputDevice.getDevice(deviceId);
+            if (device.getSources() == InputDevice.SOURCE_MOUSE) {
+                Log.d(TAG, "Mouse Changed");
+
+            }
+        }
+
+        @Override
+        public void onInputDeviceChanged ( int deviceId){
+            InputDevice device = InputDevice.getDevice(deviceId);
+            if (device.getSources() == InputDevice.SOURCE_MOUSE) {
+                Log.d(TAG, "Mouse Unplugged");
+                this.MouseIsPresent = false;
+            }
+        }
+
+        @Override
+        public boolean onKeyDown ( int keyCode, KeyEvent keyEvent){
+            Log.d(TAG, "key down " + keyCode);
+            //userEventManager.keyDown(keyCode);
+            return false;
+        }
+
+        @Override
+        public boolean onKeyUp ( int keyCode, KeyEvent keyEvent){
+            Log.d(TAG, "key up " + keyCode);
+            //userEventManager.keyUp(keyCode);
+            return false;
         }
     }
-
-    @Override
-    public void onInputDeviceRemoved(int deviceId) {
-        InputDevice device = InputDevice.getDevice(deviceId);
-        if (device.getSources() == InputDevice.SOURCE_MOUSE) {
-            Log.d(TAG, "Mouse Changed");
-
-        }
-    }
-
-    @Override
-    public void onInputDeviceChanged(int deviceId) {
-        InputDevice device = InputDevice.getDevice(deviceId);
-        if (device.getSources() == InputDevice.SOURCE_MOUSE) {
-            Log.d(TAG, "Mouse Unplugged");
-            this.MouseIsPresent = false;
-        }
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent keyEvent) {
-        Log.d(TAG, "key down " + keyCode);
-        //userEventManager.keyDown(keyCode);
-        return false;
-    }
-
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent keyEvent) {
-        Log.d(TAG, "key up " + keyCode);
-        //userEventManager.keyUp(keyCode);
-        return false;
-    }
-}
