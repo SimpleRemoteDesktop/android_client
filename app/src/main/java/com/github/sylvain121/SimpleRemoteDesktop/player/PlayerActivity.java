@@ -82,11 +82,8 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
         soundThread.start();
         connectionThread = new ConnectionThread(this.IPAddress, 8001,
                 this.inputNetworkQueue, this.videoQueue, this.soundQueue);
+
         connectionThread.start();
-
-
-
-
     }
 
     private void setEventHandler(SurfaceView sv) {
@@ -140,12 +137,13 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        Log.d("SURFACE", "SURFACE CREATED");
-        this.connectionThread.setConnectionParameters(this.codec_width, this.codec_height, this.bandwidth, this.fps);
+        Log.d(TAG, "SURFACE CREATED");
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        Log.d(TAG, "Surface changed width: "+ width+" height: "+height);
+        //FIXME life cycle of surface and stream
         if (videoThread != null) {
             this.videoThread.close();
             try {
@@ -158,11 +156,12 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
         videoThread.start();
 
         userEventManager.setScreenSize(width, height);
+        this.connectionThread.sendStartPacket(this.codec_width, this.codec_height, this.bandwidth, this.fps);
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        Log.d("SURFACE", "SURFACE DESTROYED");
+        Log.d(TAG, "SURFACE DESTROYED");
     }
 
     @Override

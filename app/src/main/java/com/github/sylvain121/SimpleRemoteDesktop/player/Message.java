@@ -29,6 +29,9 @@ public class Message {
     private int fps = 0;
     private static int sdl = 0; // always to 0 not a sdl client
 
+    public int getType() {
+        return this.type;
+    }
     public void setType(int type) {
         this.type = type;
     }

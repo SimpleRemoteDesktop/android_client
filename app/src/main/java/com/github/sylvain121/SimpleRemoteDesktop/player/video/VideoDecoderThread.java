@@ -53,11 +53,11 @@ public class VideoDecoderThread extends Thread {
             byte[] pps = Arrays.copyOfRange(frameData, ppsOffset, dataOffset);
             byte[] data = Arrays.copyOfRange(frameData, dataOffset, frameData.length);
 
-            submitFrame(sps);
-            submitFrame(pps);
-            submitFrame(data);
+            this.submitFrame(sps);
+            this.submitFrame(pps);
+            this.submitFrame(data);
         } else {
-            submitFrame(frameData);
+            this.submitFrame(frameData);
         }
     }
 
@@ -68,7 +68,7 @@ public class VideoDecoderThread extends Thread {
         while (this.isRunning) {
             if (!this.videoQueue.isEmpty()) {
                 Frame frame = this.videoQueue.poll();
-                this.submitFrame(frame.data);
+                this.videoNALParser(frame.data);
             } else {
                 try {
                     Thread.sleep(1); //FIXME

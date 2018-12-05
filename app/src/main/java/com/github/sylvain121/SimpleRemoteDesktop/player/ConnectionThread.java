@@ -15,15 +15,13 @@ class ConnectionThread extends Thread {
     private final LinkedList<Frame> videoQueue;
     private final LinkedList<Frame> soundQueue;
     private final int port;
-    private DataManagerChannel m_renderSock;
+    private ConnectionSendThread sendThread;
+    private DataManagerChannel networkChan;
     private int FrameNumber = 0;
 
     private final static String TAG = "CONNEXION_THREAD";
     private String hostname;
-    private int fps;
-    private int codecWidth;
-    private int codecHeight;
-    private int bandwidth;
+    private boolean isRunning;
 
     public ConnectionThread(String hostname, int port, LinkedList<Message> inputNetworkQueue, LinkedList<Frame> videoQueue, LinkedList<Frame> soundQueue) {
         this.hostname = hostname;
@@ -36,35 +34,28 @@ class ConnectionThread extends Thread {
 
     public void connect(String hostname, int port) {
         Log.d(TAG, "getting network instance");
-        m_renderSock = DataManagerChannel.getInstance();
+        this.networkChan = DataManagerChannel.getInstance();
         Log.d(TAG, "connecting to serveur " + hostname + " port " + port);
-        m_renderSock.connect(hostname, port);
+        this.networkChan.connect(hostname, port);
         Log.d(TAG, "Connected");
+        this.sendThread = new ConnectionSendThread(this.inputQueue, this.networkChan);
+        this.sendThread.start();
 
 
     }
 
-    public void setConnectionParameters(int codecWidth, int codecHeight, int bandwidth, int fps) {
-        this.codecHeight = codecHeight;
-        this.codecWidth = codecWidth;
-        this.bandwidth = bandwidth;
-        this.fps = fps;
-        //FIXME do something when changing parameters
-
-    }
-
-    public void sendStartPacket() {
-        Log.d(TAG, "Send start message");
-        m_renderSock.sendStartStream(this.fps, this.codecWidth, this.codecHeight, this.bandwidth);
+    public void sendStartPacket(int codecWidth, int codecHeight, int bandwidth, int fps) {
+        Log.d(TAG, "Send start message codec w: " + codecWidth + " h: " + codecHeight + " bw: " + bandwidth + " fps: " + fps);
+        this.inputQueue.add(Message.startStream(fps, codecWidth, codecHeight,bandwidth));
     }
 
     @Override
     public void run() {
+        this.isRunning = true;
+        this.connect(this.hostname, this.port);
+        while (this.isRunning) {
 
-        this.connect(this.hostname, port);
-        this.sendStartPacket();
-        while (!Thread.interrupted()) {
-            Frame frame = m_renderSock.receive();
+            Frame frame = networkChan.receive();
             switch (frame.type) {
                 case Frame.VIDEO:
                     Log.d(TAG, "New video frame");
@@ -80,16 +71,13 @@ class ConnectionThread extends Thread {
                     break;
 
             }
-            while (!this.inputQueue.isEmpty()) {
-                Message m = this.inputQueue.poll();
-                Log.d(TAG, "send new input event");
-                m_renderSock.send(m);
-            }
         }
     }
 
 
     public void close() {
-        m_renderSock.closeChannel();
+        this.isRunning = false;
+        networkChan.closeChannel();
+
     }
 }
