@@ -30,13 +30,12 @@ public class SoundDecoderThread extends Thread {
                 this.decoder.decodeFrame(frame.data);
             } else {
                 try {
-                    Thread.sleep(1);
+                    Thread.sleep(1); //FIXME
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
         }
-
         this.cleanQueue();
     }
 

@@ -12,7 +12,6 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import com.github.sylvain121.SimpleRemoteDesktop.discovery.ServerAdapter;
 import com.github.sylvain121.SimpleRemoteDesktop.player.PlayerActivity;
 import com.github.sylvain121.SimpleRemoteDesktop.settings.SettingsActivity;
 
@@ -121,9 +120,5 @@ public class MainActivity extends ListActivity implements SurfaceHolder.Callback
         startActivity(intent);
     }
 
-    public void onQuickConnect(View view) {
-        Intent intent = new Intent(this, QuickConnectActivity.class);
-        startActivity(intent);
-    }
 }
 

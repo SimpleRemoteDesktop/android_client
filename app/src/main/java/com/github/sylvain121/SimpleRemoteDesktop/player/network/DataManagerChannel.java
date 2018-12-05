@@ -24,7 +24,7 @@ public class DataManagerChannel {
     private static ByteBuffer buf = null;
     byte[] net_in = new byte[0];
     private boolean isFirstNal = true;
-    public static final String TAG = "DATAMANAGER CHANNEL";
+    public static final String TAG = "DATAMANAGER_CHANNEL";
     private SocketChannel chan = null;
     private OutputStream output;
 
@@ -32,7 +32,7 @@ public class DataManagerChannel {
     public void connect(String hostname, int port) {
         try {
 
-            Log.v("DataManager", "Connecting to socket" + hostname + ":" + port);
+            Log.v(TAG, "Connecting to socket" + hostname + ":" + port);
             final InetSocketAddress socketAddr = new InetSocketAddress(hostname, port);
             chan = SocketChannel.open();
             chan.connect(socketAddr);
@@ -82,7 +82,7 @@ public class DataManagerChannel {
                 buf.get(frame.data, 0, frame.size);
                 Log.d(TAG, "new frame array length :" + frame.size);
             } else {
-                Log.d("VIDEO DECODER THREAD", "Socket not connected reconnect");
+                Log.d(TAG, "Socket not connected reconnect");
 
             }
 
@@ -107,10 +107,10 @@ public class DataManagerChannel {
     }
 
 
-    public void sendStartStream(int width, int height, int fps, int codec_width, int codec_height, int bandwidth) {
+    public void sendStartStream(int fps, int codec_width, int codec_height, int bandwidth) {
         try {
             Log.d(TAG, "send start message");
-            output.write(Message.startStream(width, height, fps, codec_width, codec_height, bandwidth).toBytes());
+            output.write(Message.startStream(fps, codec_width, codec_height, bandwidth).toBytes());
             output.flush();
         } catch (IOException e) {
             e.printStackTrace();
@@ -120,6 +120,7 @@ public class DataManagerChannel {
 
     public void send(Message m) {
         try {
+            Log.d(TAG, "sending Message to server"+ m.getType());
             output.write(m.toBytes());
             output.flush();
         } catch (IOException e) {

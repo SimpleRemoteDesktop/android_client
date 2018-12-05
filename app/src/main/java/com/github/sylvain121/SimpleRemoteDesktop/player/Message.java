@@ -29,6 +29,9 @@ public class Message {
     private int fps = 0;
     private static int sdl = 0; // always to 0 not a sdl client
 
+    public int getType() {
+        return this.type;
+    }
     public void setType(int type) {
         this.type = type;
     }
@@ -65,7 +68,7 @@ public class Message {
         this.fps = fps;
     }
 
-    public static Message startStream(int width, int height, int fps, int codec_width, int codec_height, int bandwidth) {
+    public static Message startStream(int fps, int codec_width, int codec_height, int bandwidth) {
         Message message = new Message();
         message.type = TYPE_ENCODER_START;
         message.fps = fps;

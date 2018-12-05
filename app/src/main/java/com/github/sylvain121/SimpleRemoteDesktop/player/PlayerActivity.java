@@ -19,16 +19,14 @@ import android.view.WindowManager;
 
 import com.github.sylvain121.SimpleRemoteDesktop.CrashLogger;
 import com.github.sylvain121.SimpleRemoteDesktop.MainActivity;
-import com.github.sylvain121.SimpleRemoteDesktop.player.sound.SoundDecoder;
 import com.github.sylvain121.SimpleRemoteDesktop.player.sound.SoundDecoderThread;
 import com.github.sylvain121.SimpleRemoteDesktop.player.video.MediaCodecDecoderRenderer;
+import com.github.sylvain121.SimpleRemoteDesktop.player.video.VideoDecoderThread;
 import com.github.sylvain121.SimpleRemoteDesktop.settings.SettingsActivity;
-import com.score.rahasak.utils.OpusDecoder;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.LinkedList;
-import java.util.concurrent.LinkedBlockingDeque;
 
 public class PlayerActivity extends Activity implements SurfaceHolder.Callback, InputManager.InputDeviceListener {
 
@@ -36,12 +34,16 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
     private String TAG = "PLAYER ACTIVITY";
     private String IPAddress;
     private boolean MouseIsPresent = false;
-    private MediaCodecDecoderRenderer mediaCodec;
-    private ConnectionThread cnx;
+    private ConnectionThread connectionThread;
     private LinkedList<Message> inputNetworkQueue;
     private LinkedList<Frame> soundQueue;
     private LinkedList<Frame> videoQueue;
     private SoundDecoderThread soundThread;
+    private int codec_width = 800;
+    private int codec_height = 600;
+    private int bandwidth = 1000000;
+    private int fps = 30;
+    private VideoDecoderThread videoThread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,14 +78,44 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
 
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         setContentView(sv);
+
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
+        Intent intent = getIntent();
+        this.IPAddress = intent.getStringExtra(MainActivity.IP_ADDRESS);
+        Log.d(TAG, "server address : " + this.IPAddress);
+
+        this.soundQueue = new LinkedList<>();
+        this.videoQueue = new LinkedList<>();
+        this.inputNetworkQueue = new LinkedList<>();
+
+        setStreamParameters();
+        setEventHandler(sv);
+
+
+        soundThread = new SoundDecoderThread(48000, 2, this.soundQueue);
+        soundThread.start();
+        connectionThread = new ConnectionThread(this.IPAddress, 8001,
+                this.inputNetworkQueue, this.videoQueue, this.soundQueue);
+
+        connectionThread.start();
+    }
+
+    private void setEventHandler(SurfaceView sv) {
+        userEventManager = new UserEventManager(inputNetworkQueue);
+
         sv.setOnGenericMotionListener(new View.OnGenericMotionListener() {
             @Override
             public boolean onGenericMotion(View v, MotionEvent event) {
                 Log.d(TAG, "event : " + event.getButtonState());
                 return userEventManager.genericMouseHandler(event);
+             @Override
+             public boolean onGenericMotion(View v, MotionEvent event) {
+                 Log.d(TAG, "event : " + event.getButtonState());
+                 return userEventManager.genericMouseHandler(event);
 
-            }
-        });
+             }
+         });
 
         sv.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -96,12 +128,26 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
                 }
             }
         });
+    }
 
-        Intent intent = getIntent();
-        this.IPAddress = intent.getStringExtra(MainActivity.IP_ADDRESS);
-        Log.d(TAG, "server address : " + this.IPAddress);
-        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+        private void setStreamParameters(){
+        SharedPreferences sharedPreference = getBaseContext().getSharedPreferences(SettingsActivity.SIMPLE_REMOTE_DESKTOP_PREF, 0);
+        String currentResolution = sharedPreference.getString(SettingsActivity.SIMPLE_REMOTE_DESKTOP_PREF_RESOLUTION, null);
 
+        switch (currentResolution) {
+            case "600p":
+                this.codec_width = 800;
+                this.codec_height = 600;
+                break;
+            case "720p":
+                codec_width = 1280;
+                codec_height = 720;
+                break;
+            case "1080p":
+                codec_width = 1920;
+                codec_height = 1080;
+                break;
+        }
 
         View decorView = getWindow().getDecorView();
         decorView.setOnSystemUiVisibilityChangeListener
@@ -134,15 +180,27 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
         intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_TEXT, sStackTrace);
         startActivity(Intent.createChooser(intent, "Send crash log"));
+
+        bandwidth = sharedPreference.getInt(SettingsActivity.SIMPLE_REMOTE_DESKTOP_PREF_BITRATE, 0);
+        fps = sharedPreference.getInt(SettingsActivity.SIMPLE_REMOTE_DESKTOP_PREF_FPS, 0);
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        Log.d("SURFACE", "SURFACE CREATED");
+        Log.d(TAG, "SURFACE CREATED");
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        Log.d(TAG, "Surface changed width: "+ width+" height: "+height);
+        //FIXME life cycle of surface and stream
+        if (videoThread != null) {
+            this.videoThread.close();
+            try {
+                this.videoThread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace(); //FIXME
+            }
 
         if (mediaCodec != null || cnx != null) {
             mediaCodec.stop();
@@ -158,23 +216,16 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
         mediaCodec.setRenderTarget(holder);
         Log.d(TAG, "set H264 codec parameter");
         mediaCodec.setup(width, height);
+        videoThread = new VideoDecoderThread(videoQueue, width, height, holder);
+        videoThread.start();
 
         userEventManager.setScreenSize(width, height);
-        Log.d(TAG, "Start H264 encoder");
-        mediaCodec.start();
-        Log.d(TAG, "start audio decoder");
-        soundThread = new SoundDecoderThread(48000, 2, this.soundQueue);
-        soundThread.start();
-        Log.d(TAG, "init  network thread");
-        cnx = new ConnectionThread(width, height, this.IPAddress, sharedPreference, inputNetworkQueue, videoQueue, soundQueue);
-        cnx.setDecoderHandler(mediaCodec);
-        Log.d(TAG, "start network thread");
-        cnx.start();
+        this.connectionThread.sendStartPacket(this.codec_width, this.codec_height, this.bandwidth, this.fps);
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        Log.d("SURFACE", "SURFACE DESTROYED");
+        Log.d(TAG, "SURFACE DESTROYED");
     }
 
     @Override

@@ -7,7 +7,7 @@ import android.view.MotionEvent;
 import java.util.LinkedList;
 
 /**
- * Created by ESME7383 on 02/08/2017.
+ * Created by sylvain121 on 02/08/2017.
  */
 
 class UserEventManager {
