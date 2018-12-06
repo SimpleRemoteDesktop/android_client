@@ -24,10 +24,12 @@ public class SettingsActivity extends Activity {
     public static final String SIMPLE_REMOTE_DESKTOP_PREF = "simple.remote.desktop.pref";
     private SharedPreferences sharedPreference;
     private String currentResolution;
+    private InputType currentInput;
     private int currentBandwith;
     private int CurrentFps;
     private Spinner resolutiItems;
     private Spinner fpsItems;
+    private Spinner inputItems;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +50,23 @@ public class SettingsActivity extends Activity {
     private void updateBandwithInput() {
         EditText v = (EditText) findViewById(R.id.currentBandwith);
         v.setText(currentBandwith+"");
+    }
+
+    private void updateInputSpinner() {
+        List<InputType> inputType = new ArrayList<>();
+        inputType.add(new InputType("Touchscreen", 1));
+        inputType.add(new InputType("Touchscreen + relative Mouse", 2));
+
+        ArrayAdapter<InputType> inputAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, inputType);
+        inputAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        inputItems.setAdapter(inputAdapter);
+
+        if(currentInput != null) {
+            int spinnerPosition = inputAdapter.getPosition(currentInput);
+            inputItems.setSelection(spinnerPosition);
+        }
+
+
     }
 
     private void updateResolutionSpinner() {
