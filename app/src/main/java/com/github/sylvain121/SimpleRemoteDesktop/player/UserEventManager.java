@@ -1,5 +1,6 @@
 package com.github.sylvain121.SimpleRemoteDesktop.player;
 
+import android.hardware.input.InputManager;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -14,9 +15,8 @@ class UserEventManager {
 
     public static String TAG = "EVENT LISTENER";
     private final LinkedList<Message> queue;
+    private final int currentInputType;
     private int previousButtonState = 0;
-
-
 
 
     private int leftMask = 1;
@@ -25,51 +25,64 @@ class UserEventManager {
     private Boolean prevRight = false;
     private int screenWidth = 0;
     private int screenHeight = 0;
+    private float currentX = 0;
+    private float currentY;
 
-    public UserEventManager(LinkedList<Message> inputNetworkQueue) {
+    public UserEventManager(LinkedList<Message> inputNetworkQueue, int currentInputType) {
+        //FIXME  should be refactor to ENUM
+        this.currentInputType = currentInputType;
         this.queue = inputNetworkQueue;
     }
 
 
     public boolean genericMouseHandler(MotionEvent event) {
-
         boolean left = (event.getButtonState() & leftMask) == leftMask;
         boolean right = (event.getButtonState() & rightMask) == rightMask;
-        Log.d(TAG, event.getButtonState()+"");
-        Log.d(TAG, event.getAction()+"");
+        Log.d(TAG, event.getButtonState() + "");
+        Log.d(TAG, event.getAction() + "");
         Log.d(TAG, "left : " + left + " right : " + right);
 
-                if (isMouseButtonStateChange(left, preLeft)) {
-                    Log.d(TAG, "input : left click change detected");
-                    preLeft = left;
-                    sendMouseButtonUpdate("left", left);
-                } else if (isMouseButtonStateChange(right, prevRight)) {
-                    prevRight = right;
-                    Log.d(TAG, "input : right click change detected");
-                    sendMouseButtonUpdate("right", right);
-                } else {
-                    sendMousePosition(event.getX(), event.getY());
-                }
-                Log.d(TAG, "input add event to queue");
+        if (isMouseButtonStateChange(left, preLeft)) {
+            Log.d(TAG, "input : left click change detected");
+            preLeft = left;
+            sendMouseButtonUpdate("left", left);
+        } else if (isMouseButtonStateChange(right, prevRight)) {
+            prevRight = right;
+            Log.d(TAG, "input : right click change detected");
+            sendMouseButtonUpdate("right", right);
+        } else {
+            if (this.currentInputType == 2) {
+                Log.d(TAG, "RELATIVE X: "+event.getAxisValue(MotionEvent.AXIS_RELATIVE_X)+" Y: "+event.getAxisValue(MotionEvent.AXIS_RELATIVE_Y));
+                setRelativeMousePosition(event.getAxisValue(MotionEvent.AXIS_RELATIVE_X),event.getAxisValue(MotionEvent.AXIS_RELATIVE_Y));
+            } else {
+
+                sendMousePosition(event.getX(), event.getY());
+            }
+
+        }
+        Log.d(TAG, "input add event to queue");
 
         return true;
     }
 
+    private void setRelativeMousePosition(float x, float y) {
+           this.queue.add(Message.relativeMouseMove(x, y));
+    }
+
     private void sendMousePosition(float fx, float fy) {
-        if( screenWidth > 0 && screenHeight > 0) {
+        if (screenWidth > 0 && screenHeight > 0) {
             float x = fx / this.screenWidth;
             float y = fy / this.screenHeight;
             Log.d(TAG, "X : " + x + " Y : " + y);
             this.queue.add(Message.mouseMove(x, y));
-            //DataManagerChannel.getInstance().sendMouseMotion(x, y);
-        }else {
+        } else {
             Log.d(TAG, "input : Unable to send mouse position screen not initialized");
         }
     }
 
     private void sendMouseButtonUpdate(String buttonName, boolean isPressed) {
         Log.d(TAG, "input : send mouse button update " + buttonName + " isPressed ?: " + isPressed);
-        if(isPressed) {
+        if (isPressed) {
             this.queue.add(Message.mouseButtonDown(buttonName));
         } else {
             this.queue.add(Message.mouseButtonUp(buttonName));
@@ -92,7 +105,7 @@ class UserEventManager {
                 sendMouseButtonUpdate("left", false);
                 break;
         }
-        Log.d(TAG, "message queue: "+this.queue.size());
+        Log.d(TAG, "message queue: " + this.queue.size());
         return true;
     }
 

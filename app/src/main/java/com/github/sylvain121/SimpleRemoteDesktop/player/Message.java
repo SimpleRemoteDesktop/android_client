@@ -11,11 +11,12 @@ public class Message {
 
     public static int TYPE_KEY_DOWN = 1;
     public static int TYPE_KEY_UP = 2;
-    public static int TYPE_MOUSE_MOTION= 3;
+    public static int TYPE_MOUSE_MOTION = 3;
     public static int TYPE_MOUSE_DOWN = 4;
-    public static int TYPE_MOUSE_UP= 5;
+    public static int TYPE_MOUSE_UP = 5;
     public static int TYPE_ENCODER_START = 6;
     public static int TYPE_ENCODER_STOP = 7;
+    public static int TYPE_MOUSE_RELATIVE_MOVE = 8;
 
     private int type = 0;
     private float x = 0;
@@ -32,6 +33,7 @@ public class Message {
     public int getType() {
         return this.type;
     }
+
     public void setType(int type) {
         this.type = type;
     }
@@ -132,8 +134,8 @@ public class Message {
     public static Message mouseButtonDown(String buttonName) {
         Message message = new Message();
         message.type = TYPE_MOUSE_DOWN;
-        if(buttonName.equals("left")) message.button = 1;
-        if(buttonName.equals("right")) message.button = 2;
+        if (buttonName.equals("left")) message.button = 1;
+        if (buttonName.equals("right")) message.button = 2;
 
         return message;
 
@@ -142,8 +144,8 @@ public class Message {
     public static Message mouseButtonUp(String buttonName) {
         Message message = new Message();
         message.type = TYPE_MOUSE_UP;
-        if(buttonName.equals("left")) message.button = 1;
-        if(buttonName.equals("right")) message.button = 2;
+        if (buttonName.equals("left")) message.button = 1;
+        if (buttonName.equals("right")) message.button = 2;
 
         return message;
     }
@@ -160,6 +162,15 @@ public class Message {
         Message message = new Message();
         message.type = Message.TYPE_KEY_UP;
         message.keyCode = keyCode;
+
+        return message;
+    }
+
+    public static Message relativeMouseMove(float x, float y) {
+        Message message = new Message();
+        message.type = Message.TYPE_MOUSE_RELATIVE_MOVE;
+        message.x = x;
+        message.y = y;
 
         return message;
     }

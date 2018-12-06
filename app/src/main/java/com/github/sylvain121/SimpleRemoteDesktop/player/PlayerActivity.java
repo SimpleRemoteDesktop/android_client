@@ -17,10 +17,8 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
-import com.github.sylvain121.SimpleRemoteDesktop.CrashLogger;
 import com.github.sylvain121.SimpleRemoteDesktop.MainActivity;
 import com.github.sylvain121.SimpleRemoteDesktop.player.sound.SoundDecoderThread;
-import com.github.sylvain121.SimpleRemoteDesktop.player.video.MediaCodecDecoderRenderer;
 import com.github.sylvain121.SimpleRemoteDesktop.player.video.VideoDecoderThread;
 import com.github.sylvain121.SimpleRemoteDesktop.settings.SettingsActivity;
 
@@ -44,6 +42,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
     private int bandwidth = 1000000;
     private int fps = 30;
     private VideoDecoderThread videoThread;
+    private int currentInputType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +66,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
         this.videoQueue = new LinkedList<Frame>();
         this.inputNetworkQueue = new LinkedList<Message>();
 
-        userEventManager = new UserEventManager(inputNetworkQueue);
+        userEventManager = new UserEventManager(inputNetworkQueue, currentInputType);
 
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         setContentView(sv);
@@ -95,7 +94,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
     }
 
     private void setEventHandler(SurfaceView sv) {
-        userEventManager = new UserEventManager(inputNetworkQueue);
+        userEventManager = new UserEventManager(inputNetworkQueue, currentInputType);
 
         sv.setOnGenericMotionListener(new View.OnGenericMotionListener() {
             @Override
@@ -119,6 +118,12 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
     }
 
     private void setStreamParameters() {
+        //FIXME fix to relative mouse.
+        //FIXME should be set in settings.
+
+        currentInputType = 2;
+
+
         SharedPreferences sharedPreference = getBaseContext().getSharedPreferences(SettingsActivity.SIMPLE_REMOTE_DESKTOP_PREF, 0);
         String currentResolution = sharedPreference.getString(SettingsActivity.SIMPLE_REMOTE_DESKTOP_PREF_RESOLUTION, null);
 
