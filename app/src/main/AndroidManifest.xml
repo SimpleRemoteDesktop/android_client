@@ -26,10 +26,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".QuickConnectActivity"
-            android:label="@string/title_activity_quick_connect"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
