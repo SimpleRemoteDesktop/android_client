@@ -135,6 +135,10 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
                 codec_width = 1920;
                 codec_height = 1080;
                 break;
+            case "1200p":
+                codec_width = 1920;
+                codec_height = 1200;
+                break;
         }
 
         View decorView = getWindow().getDecorView();
