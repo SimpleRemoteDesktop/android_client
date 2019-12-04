@@ -54,6 +54,7 @@ public class SettingsActivity extends Activity {
         List<String> resolutionArray = new ArrayList<String>();
         resolutionArray.add("600p");
         resolutionArray.add("720p");
+        resolutionArray.add("768p");
         resolutionArray.add("1080p");
          //resolutionArray.add("original"); FIXME code height and width passed to decoder ?
 

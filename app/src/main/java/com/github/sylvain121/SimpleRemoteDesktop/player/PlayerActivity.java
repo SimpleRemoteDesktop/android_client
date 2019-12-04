@@ -16,9 +16,11 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 
 import com.github.sylvain121.SimpleRemoteDesktop.CrashLogger;
 import com.github.sylvain121.SimpleRemoteDesktop.MainActivity;
+import com.github.sylvain121.SimpleRemoteDesktop.player.controller.SRDScreenController;
 import com.github.sylvain121.SimpleRemoteDesktop.player.sound.SoundDecoderThread;
 import com.github.sylvain121.SimpleRemoteDesktop.player.video.MediaCodecDecoderRenderer;
 import com.github.sylvain121.SimpleRemoteDesktop.player.video.VideoDecoderThread;
@@ -44,6 +46,9 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
     private int bandwidth = 1000000;
     private int fps = 30;
     private VideoDecoderThread videoThread;
+    private int currentInputType;
+    private FrameLayout topLayout;
+    private SRDScreenController SRDController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +65,9 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        topLayout = new FrameLayout(this);
+
         SurfaceView sv = new SurfaceView(this);
         sv.getHolder().addCallback(this);
 
@@ -70,7 +78,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
         userEventManager = new UserEventManager(inputNetworkQueue);
 
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        setContentView(sv);
+        setContentView(topLayout);
 
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
@@ -84,10 +92,13 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
 
         setStreamParameters();
         setEventHandler(sv);
+        topLayout.addView(sv);
 
+        SRDController = new SRDScreenController(this);
+        topLayout.addView(SRDController.getView());
 
-        soundThread = new SoundDecoderThread(48000, 2, this.soundQueue);
-        soundThread.start();
+        //soundThread = new SoundDecoderThread(48000, 2, this.soundQueue);
+        //soundThread.start();
         connectionThread = new ConnectionThread(this.IPAddress, 8001,
                 this.inputNetworkQueue, this.videoQueue, this.soundQueue);
 
@@ -95,12 +106,13 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
     }
 
     private void setEventHandler(SurfaceView sv) {
+
         userEventManager = new UserEventManager(inputNetworkQueue);
 
         sv.setOnGenericMotionListener(new View.OnGenericMotionListener() {
             @Override
             public boolean onGenericMotion(View v, MotionEvent event) {
-                Log.d(TAG, "event : " + event.getButtonState());
+                Log.w(TAG, "event : " + event.getButtonState());
                 return userEventManager.genericMouseHandler(event);
             }
         });
@@ -108,7 +120,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
         sv.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                Log.d(TAG, "touch event : " + event.getButtonState());
+                Log.w(TAG, "touch event : " + event.getButtonState());
                 if (event.getDevice().getSources() != InputDevice.SOURCE_MOUSE) {
                     return userEventManager.onTouchHandler(event);
                 } else {
@@ -119,6 +131,12 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
     }
 
     private void setStreamParameters() {
+        //FIXME fix to relative mouse.
+        //FIXME should be set in settings.
+
+        currentInputType = 2;
+
+
         SharedPreferences sharedPreference = getBaseContext().getSharedPreferences(SettingsActivity.SIMPLE_REMOTE_DESKTOP_PREF, 0);
         String currentResolution = sharedPreference.getString(SettingsActivity.SIMPLE_REMOTE_DESKTOP_PREF_RESOLUTION, null);
 
@@ -131,6 +149,9 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback, 
                 codec_width = 1280;
                 codec_height = 720;
                 break;
+            case "768p":
+                codec_width = 1360;
+                codec_height = 768;
             case "1080p":
                 codec_width = 1920;
                 codec_height = 1080;
